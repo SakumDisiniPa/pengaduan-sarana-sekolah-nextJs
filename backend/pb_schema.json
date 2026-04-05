@@ -1,177 +1,5 @@
 [
     {
-        "id": "pbc_3142635823",
-        "listRule": null,
-        "viewRule": null,
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "name": "_superusers",
-        "type": "auth",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "cost": 0,
-                "hidden": true,
-                "id": "password901924565",
-                "max": 0,
-                "min": 8,
-                "name": "password",
-                "pattern": "",
-                "presentable": false,
-                "required": true,
-                "system": true,
-                "type": "password"
-            },
-            {
-                "autogeneratePattern": "[a-zA-Z0-9]{50}",
-                "hidden": true,
-                "id": "text2504183744",
-                "max": 60,
-                "min": 30,
-                "name": "tokenKey",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "exceptDomains": null,
-                "hidden": false,
-                "id": "email3885137012",
-                "name": "email",
-                "onlyDomains": null,
-                "presentable": false,
-                "required": true,
-                "system": true,
-                "type": "email"
-            },
-            {
-                "hidden": false,
-                "id": "bool1547992806",
-                "name": "emailVisibility",
-                "presentable": false,
-                "required": false,
-                "system": true,
-                "type": "bool"
-            },
-            {
-                "hidden": false,
-                "id": "bool256245529",
-                "name": "verified",
-                "presentable": false,
-                "required": false,
-                "system": true,
-                "type": "bool"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [
-            "CREATE UNIQUE INDEX `idx_tokenKey_pbc_3142635823` ON `_superusers` (`tokenKey`)",
-            "CREATE UNIQUE INDEX `idx_email_pbc_3142635823` ON `_superusers` (`email`) WHERE `email` != ''"
-        ],
-        "system": true,
-        "authRule": "",
-        "manageRule": null,
-        "authAlert": {
-            "enabled": true,
-            "emailTemplate": {
-                "subject": "Login from a new location",
-                "body": "<p>Hello,</p>\n<p>We noticed a login to your {APP_NAME} account from a new location:</p>\n<p><em>{ALERT_INFO}</em></p>\n<p><strong>If this wasn't you, you should immediately change your {APP_NAME} account password to revoke access from all other locations.</strong></p>\n<p>If this was you, you may disregard this email.</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
-            }
-        },
-        "oauth2": {
-            "mappedFields": {
-                "id": "",
-                "name": "",
-                "username": "",
-                "avatarURL": ""
-            },
-            "enabled": false
-        },
-        "passwordAuth": {
-            "enabled": true,
-            "identityFields": [
-                "email"
-            ]
-        },
-        "mfa": {
-            "enabled": false,
-            "duration": 1800,
-            "rule": ""
-        },
-        "otp": {
-            "enabled": false,
-            "duration": 180,
-            "length": 8,
-            "emailTemplate": {
-                "subject": "OTP for {APP_NAME}",
-                "body": "<p>Hello,</p>\n<p>Your one-time password is: <strong>{OTP}</strong></p>\n<p><i>If you didn't ask for the one-time password, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
-            }
-        },
-        "authToken": {
-            "duration": 86400
-        },
-        "passwordResetToken": {
-            "duration": 1800
-        },
-        "emailChangeToken": {
-            "duration": 1800
-        },
-        "verificationToken": {
-            "duration": 259200
-        },
-        "fileToken": {
-            "duration": 180
-        },
-        "verificationTemplate": {
-            "subject": "Verify your {APP_NAME} email",
-            "body": "<p>Hello,</p>\n<p>Thank you for joining us at {APP_NAME}.</p>\n<p>Click on the button below to verify your email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-verification/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Verify</a>\n</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
-        },
-        "resetPasswordTemplate": {
-            "subject": "Reset your {APP_NAME} password",
-            "body": "<p>Hello,</p>\n<p>Click on the button below to reset your password.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-password-reset/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Reset password</a>\n</p>\n<p><i>If you didn't ask to reset your password, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
-        },
-        "confirmEmailChangeTemplate": {
-            "subject": "Confirm your {APP_NAME} new email address",
-            "body": "<p>Hello,</p>\n<p>Click on the button below to confirm your new email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-email-change/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Confirm new email</a>\n</p>\n<p><i>If you didn't ask to change your email address, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
-        }
-    },
-    {
         "id": "_pb_users_auth_",
         "listRule": "@request.auth.id != \"\"",
         "viewRule": "@request.auth.id != \"\"",
@@ -349,7 +177,7 @@
             "enabled": true,
             "emailTemplate": {
                 "subject": "Login from a new location",
-                "body": "<p>Hello,</p>\n<p>We noticed a login to your {APP_NAME} account from a new location:</p>\n<p><em>{ALERT_INFO}</em></p>\n<p><strong>If this wasn't you, you should immediately change your {APP_NAME} account password to revoke access from all other locations.</strong></p>\n<p>If this was you, you may disregard this email.</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
+                "body": "<!DOCTYPE html>\n<html>\n<body style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9f9; padding: 20px;\">\n    <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden;\">\n        <div style=\"background-color: #007bff; padding: 20px; text-align: center;\">\n            <h1 style=\"color: #ffffff; margin: 0; font-size: 24px;\">{APP_NAME} Security</h1>\n        </div>\n        \n        <div style=\"padding: 30px; color: #333333; line-height: 1.6;\">\n            <p style=\"font-size: 16px;\">Halo,</p>\n            <p>Kami mendeteksi adanya login baru ke akun <strong>{APP_NAME}</strong> kamu dari lokasi berikut:</p>\n            \n            <div style=\"background-color: #f1f1f1; padding: 15px; border-radius: 5px; margin: 20px 0; font-style: italic; font-family: monospace;\">\n                {ALERT_INFO}\n            </div>\n\n            <p style=\"color: #d9534f; font-weight: bold;\">Jika ini bukan kamu, segera amankan akun kamu dengan mengganti password sekarang juga!</p>\n            \n            <p>Jika ini memang kamu, silakan abaikan email ini.</p>\n        </div>\n\n        <div style=\"padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee;\">\n            &copy; 2026 {APP_NAME}. Sakum Studios Security.\n        </div>\n    </div>\n</body>\n</html>"
             }
         },
         "oauth2": {
@@ -370,15 +198,15 @@
         "mfa": {
             "enabled": false,
             "duration": 1800,
-            "rule": ""
+            "rule": "email != ''"
         },
         "otp": {
             "enabled": false,
-            "duration": 180,
+            "duration": 600,
             "length": 8,
             "emailTemplate": {
                 "subject": "OTP for {APP_NAME}",
-                "body": "<p>Hello,</p>\n<p>Your one-time password is: <strong>{OTP}</strong></p>\n<p><i>If you didn't ask for the one-time password, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
+                "body": "<!DOCTYPE html>\n<html lang=\"id\">\n<body style=\"margin: 0; padding: 0; background-color: #f4f7fb; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\">\n  <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n    <tr>\n      <td align=\"center\" style=\"padding: 40px 10px;\">\n        <table role=\"presentation\" width=\"100%\" style=\"max-width: 500px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05);\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n          \n          <tr>\n            <td style=\"background: linear-gradient(135deg, #1e2b3c 0%, #0f212f 100%); padding: 35px 30px; text-align: center;\">\n              <h1 style=\"margin: 0; font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;\">{APP_NAME}</h1>\n              <p style=\"margin: 5px 0 0; font-size: 13px; color: #b3d0e6; font-weight: 400;\">Verifikasi Keamanan Akun</p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 40px 35px;\">\n              <h2 style=\"margin: 0 0 15px; font-size: 20px; font-weight: 600; color: #1e2b3c;\">Halo,</h2>\n              <p style=\"margin: 0 0 30px; font-size: 16px; color: #4a5568; line-height: 1.6;\">\n                Anda baru saja meminta kode akses untuk masuk ke akun Anda. Gunakan kode verifikasi di bawah ini untuk melanjutkan:\n              </p>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"center\" style=\"background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px 20px;\">\n                    <span style=\"display: block; font-size: 12px; font-weight: 700; color: #64748b; letter-spacing: 1.5px; margin-bottom: 15px; text-transform: uppercase;\">KODE OTP ANDA</span>\n                    <div style=\"display: inline-block; background-color: #ffffff; padding: 12px 25px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02);\">\n                      <span style=\"font-family: 'Courier New', Courier, monospace; font-size: 38px; font-weight: 800; color: #0f172a; letter-spacing: 8px;\">{OTP}</span>\n                    </div>\n                    <p style=\"margin: 15px 0 0; font-size: 12px; color: #94a3b8;\">Kode ini akan kedaluwarsa dalam 10 menit.</p>\n                  </td>\n                </tr>\n              </table>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"margin-top: 30px;\">\n                <tr>\n                  <td style=\"background-color: #fffaf0; border-left: 4px solid #ed8936; padding: 15px; border-radius: 8px;\">\n                    <p style=\"margin: 0; font-size: 13px; color: #744210; line-height: 1.5;\">\n                      <strong>Peringatan Keamanan:</strong> Jangan berikan kode ini kepada siapapun. Tim {APP_NAME} tidak akan pernah meminta kode Anda melalui telepon atau chat.\n                    </p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 25px 35px; background-color: #fcfcfc; border-top: 1px solid #f1f5f9; text-align: center;\">\n              <p style=\"margin: 0; font-size: 14px; color: #4a5568;\">Terima kasih,<br><strong>Tim {APP_NAME}</strong></p>\n              <p style=\"margin: 20px 0 0; font-size: 11px; color: #94a3b8; line-height: 1.4;\">\n                Email ini dikirim secara otomatis ke domain terdaftar Anda di <strong>pengaduansaranasekolah.sakum.my.id</strong>. Jika Anda tidak merasa meminta kode ini, silakan abaikan.\n              </p>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>"
             }
         },
         "authToken": {
@@ -398,25 +226,25 @@
         },
         "verificationTemplate": {
             "subject": "Verify your {APP_NAME} email",
-            "body": "<p>Hello,</p>\n<p>Thank you for joining us at {APP_NAME}.</p>\n<p>Click on the button below to verify your email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-verification/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Verify</a>\n</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
+            "body": "<!DOCTYPE html>\n<html lang=\"id\">\n<body style=\"margin: 0; padding: 0; background-color: #f4f7fb; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\">\n  <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n    <tr>\n      <td align=\"center\" style=\"padding: 40px 10px;\">\n        <table role=\"presentation\" width=\"100%\" style=\"max-width: 500px; background-color: #ffffff; border-radius: 28px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.07);\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n          \n          <tr>\n            <td style=\"background: linear-gradient(135deg, #1e2b3c 0%, #0f212f 100%); padding: 45px 30px; text-align: center;\">\n              <div style=\"font-size: 13px; color: #b3d0e6; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: 600;\">Selamat Datang</div>\n              <h1 style=\"margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;\">{APP_NAME}</h1>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 45px 35px;\">\n              <h2 style=\"margin: 0 0 15px; font-size: 22px; font-weight: 600; color: #1e2b3c;\">Halo! 👋</h2>\n              <p style=\"margin: 0 0 25px; font-size: 16px; color: #4a5568; line-height: 1.6;\">\n                Terima kasih telah bergabung dengan <strong>{APP_NAME}</strong>. Satu langkah terakhir sebelum Anda mulai, silakan konfirmasi alamat email Anda dengan menekan tombol di bawah ini:\n              </p>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"center\" style=\"padding: 10px 0 35px;\">\n                    <a href=\"{APP_URL}/_/#/auth/confirm-verification/{TOKEN}\" target=\"_blank\" style=\"display: inline-block; background-color: #28a745; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 45px; border-radius: 14px; box-shadow: 0 6px 18px rgba(40, 167, 69, 0.3);\">\n                      Verifikasi Akun Saya\n                    </a>\n                  </td>\n                </tr>\n              </table>\n\n              <p style=\"margin: 0 0 10px; font-size: 12px; color: #94a3b8; text-align: center;\">Jika tombol tidak berfungsi, salin link ini:</p>\n              <div style=\"background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; word-break: break-all; font-size: 11px; color: #64748b; text-align: center; font-family: monospace;\">\n                {APP_URL}/_/#/auth/confirm-verification/{TOKEN}\n              </div>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 30px 35px; background-color: #fafcff; border-top: 1px solid #f1f5f9; text-align: center;\">\n              <p style=\"margin: 0; font-size: 14px; color: #4a5568;\">Sampai jumpa di aplikasi,<br><strong>Tim {APP_NAME}</strong></p>\n              <div style=\"margin: 25px 0 0; font-size: 11px; color: #94a3b8; line-height: 1.4;\">\n                Email ini dikirimkan untuk mengonfirmasi pendaftaran akun Anda di <strong>{APP_NAME}</strong> melalui domain <strong>pengaduansaranasekolah.sakum.my.id</strong>.\n              </div>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>"
         },
         "resetPasswordTemplate": {
             "subject": "Reset your {APP_NAME} password",
-            "body": "<p>Hello,</p>\n<p>Click on the button below to reset your password.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-password-reset/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Reset password</a>\n</p>\n<p><i>If you didn't ask to reset your password, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
+            "body": "<!DOCTYPE html>\n<html lang=\"id\">\n<body style=\"margin: 0; padding: 0; background-color: #f4f7fb; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\">\n  <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n    <tr>\n      <td align=\"center\" style=\"padding: 40px 10px;\">\n        <table role=\"presentation\" width=\"100%\" style=\"max-width: 500px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05);\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n          \n          <tr>\n            <td style=\"background: linear-gradient(135deg, #1e2b3c 0%, #0f212f 100%); padding: 35px 30px; text-align: center;\">\n              <h1 style=\"margin: 0; font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;\">{APP_NAME}</h1>\n              <p style=\"margin: 5px 0 0; font-size: 13px; color: #b3d0e6; font-weight: 400;\">Atur Ulang Kata Sandi</p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 40px 35px;\">\n              <h2 style=\"margin: 0 0 15px; font-size: 20px; font-weight: 600; color: #1e2b3c;\">Halo,</h2>\n              <p style=\"margin: 0 0 25px; font-size: 16px; color: #4a5568; line-height: 1.6;\">\n                Kami menerima permintaan untuk mengatur ulang kata sandi akun <strong>{APP_NAME}</strong> Anda. Silakan klik tombol di bawah ini untuk membuat kata sandi baru:\n              </p>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"center\" style=\"padding: 10px 0 30px;\">\n                    <a href=\"{APP_URL}/_/#/auth/confirm-password-reset/{TOKEN}\" target=\"_blank\" style=\"display: inline-block; background-color: #dc3545; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 15px 35px; border-radius: 12px; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);\">\n                      Reset Kata Sandi\n                    </a>\n                  </td>\n                </tr>\n              </table>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                <tr>\n                  <td style=\"background-color: #fff8e7; border-left: 4px solid #f5b042; padding: 15px; border-radius: 8px;\">\n                    <p style=\"margin: 0; font-size: 13px; color: #7a6300; line-height: 1.5;\">\n                      <strong>Penting:</strong> Jika Anda tidak meminta pengaturan ulang kata sandi, abaikan email ini. Kata sandi Anda tidak akan berubah tanpa tindakan lebih lanjut.\n                    </p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 25px 35px; background-color: #fcfcfc; border-top: 1px solid #f1f5f9; text-align: center;\">\n              <p style=\"margin: 0; font-size: 14px; color: #4a5568;\">Terima kasih,<br><strong>Tim {APP_NAME}</strong></p>\n              <div style=\"margin: 20px 0 0; font-size: 11px; color: #94a3b8; line-height: 1.4;\">\n                &copy; 2026 {APP_NAME}. Keamanan Anda adalah tanggung jawab kami.\n              </div>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>"
         },
         "confirmEmailChangeTemplate": {
             "subject": "Confirm your {APP_NAME} new email address",
-            "body": "<p>Hello,</p>\n<p>Click on the button below to confirm your new email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-email-change/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Confirm new email</a>\n</p>\n<p><i>If you didn't ask to change your email address, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>"
+            "body": "<!DOCTYPE html>\n<html lang=\"id\">\n<body style=\"margin: 0; padding: 0; background-color: #f4f7fb; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\">\n  <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n    <tr>\n      <td align=\"center\" style=\"padding: 40px 10px;\">\n        <table role=\"presentation\" width=\"100%\" style=\"max-width: 500px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05);\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n          \n          <tr>\n            <td style=\"background: linear-gradient(135deg, #1e2b3c 0%, #0f212f 100%); padding: 35px 30px; text-align: center;\">\n              <h1 style=\"margin: 0; font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;\">{APP_NAME}</h1>\n              <p style=\"margin: 5px 0 0; font-size: 13px; color: #b3d0e6; font-weight: 400;\">Pembaruan Keamanan Akun</p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 40px 35px;\">\n              <h2 style=\"margin: 0 0 15px; font-size: 20px; font-weight: 600; color: #1e2b3c;\">Halo,</h2>\n              <p style=\"margin: 0 0 25px; font-size: 16px; color: #4a5568; line-height: 1.6;\">\n                Kami menerima permintaan untuk mengubah alamat email akun <strong>{APP_NAME}</strong> Anda. Silakan konfirmasi alamat email baru Anda dengan menekan tombol di bawah ini:\n              </p>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"center\" style=\"padding: 10px 0 30px;\">\n                    <a href=\"{APP_URL}/_/#/auth/confirm-email-change/{TOKEN}\" target=\"_blank\" style=\"display: inline-block; background-color: #007bff; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 15px 35px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);\">\n                      Konfirmasi Email Baru\n                    </a>\n                  </td>\n                </tr>\n              </table>\n\n              <p style=\"margin: 0; font-size: 13px; color: #94a3b8; font-style: italic; line-height: 1.5; text-align: center;\">\n                Jika Anda tidak merasa meminta perubahan ini, Anda dapat mengabaikan email ini dengan aman. Alamat email Anda tidak akan berubah tanpa konfirmasi ini.\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 25px 35px; background-color: #fcfcfc; border-top: 1px solid #f1f5f9; text-align: center;\">\n              <p style=\"margin: 0; font-size: 14px; color: #4a5568;\">Terima kasih,<br><strong>Tim {APP_NAME}</strong></p>\n              <div style=\"margin: 20px 0 0; font-size: 11px; color: #94a3b8; line-height: 1.4;\">\n                &copy; 2026 {APP_NAME}. Dikirim melalui <strong>pengaduansaranasekolah.sakum.my.id</strong>\n              </div>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>"
         }
     },
     {
-        "id": "pbc_4275539003",
-        "listRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "viewRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "name": "_authOrigins",
+        "id": "pbc_3292755704",
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "@request.auth.isAdmin = true",
+        "updateRule": "@request.auth.isAdmin = true",
+        "deleteRule": "@request.auth.isAdmin = true",
+        "name": "categories",
         "type": "base",
         "fields": [
             {
@@ -436,43 +264,15 @@
             {
                 "autogeneratePattern": "",
                 "hidden": false,
-                "id": "text455797646",
+                "id": "text1579384326",
                 "max": 0,
                 "min": 0,
-                "name": "collectionRef",
+                "name": "name",
                 "pattern": "",
                 "presentable": false,
                 "primaryKey": false,
                 "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text127846527",
-                "max": 0,
-                "min": 0,
-                "name": "recordRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text4228609354",
-                "max": 0,
-                "min": 0,
-                "name": "fingerprint",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
+                "system": false,
                 "type": "text"
             },
             {
@@ -482,7 +282,7 @@
                 "onCreate": true,
                 "onUpdate": false,
                 "presentable": false,
-                "system": true,
+                "system": false,
                 "type": "autodate"
             },
             {
@@ -492,318 +292,12 @@
                 "onCreate": true,
                 "onUpdate": true,
                 "presentable": false,
-                "system": true,
+                "system": false,
                 "type": "autodate"
             }
         ],
-        "indexes": [
-            "CREATE UNIQUE INDEX `idx_authOrigins_unique_pairs` ON `_authOrigins` (collectionRef, recordRef, fingerprint)"
-        ],
-        "system": true
-    },
-    {
-        "id": "pbc_2281828961",
-        "listRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "viewRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "name": "_externalAuths",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text455797646",
-                "max": 0,
-                "min": 0,
-                "name": "collectionRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text127846527",
-                "max": 0,
-                "min": 0,
-                "name": "recordRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text2462348188",
-                "max": 0,
-                "min": 0,
-                "name": "provider",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1044722854",
-                "max": 0,
-                "min": 0,
-                "name": "providerId",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [
-            "CREATE UNIQUE INDEX `idx_externalAuths_record_provider` ON `_externalAuths` (collectionRef, recordRef, provider)",
-            "CREATE UNIQUE INDEX `idx_externalAuths_collection_provider` ON `_externalAuths` (collectionRef, provider, providerId)"
-        ],
-        "system": true
-    },
-    {
-        "id": "pbc_2279338944",
-        "listRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "viewRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "name": "_mfas",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text455797646",
-                "max": 0,
-                "min": 0,
-                "name": "collectionRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text127846527",
-                "max": 0,
-                "min": 0,
-                "name": "recordRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1582905952",
-                "max": 0,
-                "min": 0,
-                "name": "method",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `idx_mfas_collectionRef_recordRef` ON `_mfas` (collectionRef,recordRef)"
-        ],
-        "system": true
-    },
-    {
-        "id": "pbc_1638494021",
-        "listRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "viewRule": "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "name": "_otps",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text455797646",
-                "max": 0,
-                "min": 0,
-                "name": "collectionRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text127846527",
-                "max": 0,
-                "min": 0,
-                "name": "recordRef",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "cost": 8,
-                "hidden": true,
-                "id": "password901924565",
-                "max": 0,
-                "min": 0,
-                "name": "password",
-                "pattern": "",
-                "presentable": false,
-                "required": true,
-                "system": true,
-                "type": "password"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": true,
-                "id": "text3866985172",
-                "max": 0,
-                "min": 0,
-                "name": "sentTo",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": true,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `idx_otps_collectionRef_recordRef` ON `_otps` (collectionRef, recordRef)"
-        ],
-        "system": true
+        "indexes": [],
+        "system": false
     },
     {
         "id": "pbc_3861817060",
