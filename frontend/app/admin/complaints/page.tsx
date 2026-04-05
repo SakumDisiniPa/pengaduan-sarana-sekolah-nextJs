@@ -1,247 +1,174 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { pb } from "../../../lib/pocketbase";
-import ComplaintsStats from "./ComplaintsStats";
-import ComplaintsList from "./ComplaintsList";
-import ComplaintsDetailModal from "./ComplaintsDetailModal";
-
-type Complaint = {
-  id: string;
-  title: string;
-  description: string;
-  status?: string;
-  created: string;
-  creator?: string;
-  location?: string;
-  photo?: string;
-  expand?: {
-    creator?: {
-      email?: string;
-      name?: string;
-    };
-  };
-};
+import { pb } from "@/lib/pocketbase";
+import { ComplaintFilters } from "@/lib/complaintsQueries";
+import FilterControls from "./components/FilterControls";
+import ComplaintsList from "./components/ComplaintsList";
+import { useAdminComplaints } from "./hooks/useAdminComplaints";
+import { buildEffectiveFilters } from "./utils/filterUtils";
+import { deleteComplaint } from "./utils/complaintService";
+import { formatDate } from "./utils/dateFormatter";
+import { FilterMode } from "./types";
+import { FileText } from "lucide-react";
 
 export default function AdminComplaintsPage() {
   const router = useRouter();
   const user = pb.authStore.model;
-  const [list, setList] = useState<Complaint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>("all");
-  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
 
+  // Filter states
+  const [filters, setFilters] = useState<ComplaintFilters>({
+    status: 'all'
+  });
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [month, setMonth] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(null);
+  const [searchText, setSearchText] = useState<string>("");
+  const [filterMode, setFilterMode] = useState<FilterMode>("status");
+  const [page, setPage] = useState(1);
+
+  // Auth check
   useEffect(() => {
     if (!user) {
-      router.push("/login");
+      router.push("/admin/login");
       return;
     }
     if (!user.isAdmin) {
       router.push("/");
       return;
     }
-
-    let mounted = true;
-    let unsubscribe: (() => void) | null = null;
-
-    const init = async () => {
-      try {
-        const items = await pb.collection("complaints").getFullList({
-          sort: "-created",
-          expand: "creator",
-        });
-
-        if (!mounted) return;
-
-        setList(
-          items.map((r) => ({
-            id: r.id,
-            title: r.title,
-            description: r.description,
-            status: r.status || "open",
-            created: r.created,
-            creator: r.creator,
-            location: r.location,
-            photo: r.photo?.[0],
-            expand: r.expand,
-          }))
-        );
-        setLoading(false);
-
-        unsubscribe = await pb.collection("complaints").subscribe("*", (e) => {
-          if (!mounted) return;
-
-          if (e.action === "create") {
-            pb.collection("complaints")
-              .getOne(e.record.id, { expand: "creator" })
-              .then((fullRec) => {
-                setList((prev) => [
-                  {
-                    id: fullRec.id,
-                    title: fullRec.title,
-                    description: fullRec.description,
-                    status: fullRec.status || "open",
-                    created: fullRec.created,
-                    creator: fullRec.creator,
-                    location: fullRec.location,
-                    photo: fullRec.photo,
-                    expand: fullRec.expand,
-                  },
-                  ...prev,
-                ]);
-              });
-          } else if (e.action === "update") {
-            setList((prev) =>
-              prev.map((c) =>
-                c.id === e.record.id
-                  ? { ...c, status: e.record.status || "open" }
-                  : c
-              )
-            );
-          } else if (e.action === "delete") {
-            setList((prev) => prev.filter((c) => c.id !== e.record.id));
-          }
-        });
-      } catch (err) {
-        const error = err as { isAbort?: boolean };
-        if (mounted && error?.isAbort !== true) {
-          console.error("Load error:", err);
-        }
-      }
-    };
-
-    init();
-
-    return () => {
-      mounted = false;
-      if (unsubscribe) unsubscribe();
-    };
   }, [user, router]);
 
-  const updateStatus = async (id: string, status: string) => {
+  // Build effective filters
+  const effectiveFilters = useMemo<ComplaintFilters>(() => {
+    return buildEffectiveFilters(
+      filters,
+      filterMode,
+      dateFrom,
+      dateTo,
+      month,
+      year,
+      searchText
+    );
+  }, [filters, filterMode, dateFrom, dateTo, month, year, searchText]);
+
+  // Load complaints data
+  const { complaints, loading, initialLoading, totalPages, users } = useAdminComplaints({
+    page,
+    filters: effectiveFilters,
+    enabled: !!user?.isAdmin,
+  });
+
+  const handleDeleteComplaint = async (id: string) => {
     try {
-      await pb.collection("complaints").update(id, { status });
+      await deleteComplaint(id);
     } catch (err) {
-      console.error(err);
+      // Error already handled in deleteComplaint utility
+      console.error("Delete failed:", err);
     }
   };
 
-  const deleteComplaint = async (id: string) => {
-    try {
-      await pb.collection("complaints").delete(id);
-      setList((prev) => prev.filter((c) => c.id !== id));
-      setSelectedComplaint(null);
-    } catch (err) {
-      console.error(err);
-    }
+  const handleReset = () => {
+    setFilters({ status: 'all' });
+    setDateFrom("");
+    setDateTo("");
+    setMonth(null);
+    setYear(null);
+    setSearchText("");
+    setPage(1);
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) {
-      return `Hari ini, ${date.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`;
-    } else if (days === 1) {
-      return `Kemarin, ${date.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`;
-    } else if (days < 7) {
-      return `${days} hari yang lalu`;
-    } else {
-      return date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    }
-  };
-
-  const filteredList = filter === "all" ? list : list.filter((c) => c.status === filter);
-
-  const stats = {
-    total: list.length,
-    open: list.filter((c) => c.status === "open").length,
-    inProgress: list.filter((c) => c.status === "in-progress").length,
-    resolved: list.filter((c) => c.status === "resolved").length,
-    rejected: list.filter((c) => c.status === "rejected").length,
-  };
-
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="relative flex min-h-screen items-center justify-center">
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-purple-300 opacity-20 blur-3xl filter dark:bg-purple-800/20" />
-          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300 opacity-20 blur-3xl filter dark:bg-blue-800/20" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="text-gray-500 font-medium">Memuat data...</p>
         </div>
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900 dark:to-black">
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-purple-300 opacity-20 blur-3xl filter dark:bg-purple-800/20" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300 opacity-20 blur-3xl filter dark:bg-blue-800/20" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-slate-950 dark:via-purple-950 dark:to-slate-950">
+      {/* Decorative background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl bg-white/70 backdrop-blur-md shadow-xl ring-1 ring-white/20 dark:bg-zinc-900/70">
+      <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl dark:bg-slate-800/95 border border-white/20 overflow-hidden">
           {/* Header */}
-          <div className="border-b border-white/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10 px-6 py-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Kelola Pengaduan
+          <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-6 sm:px-8 py-8 sm:py-10">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 flex items-center gap-3">
+              <FileText className="w-8 h-8" /> Manajemen Pengaduan
             </h1>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-              Admin dashboard untuk mengelola pengaduan sarana sekolah
+            <p className="text-blue-100 text-sm sm:text-base">
+              Kelola dan pantau semua pengaduan siswa dengan mudah
             </p>
+            {/* Loading Indicator Halus (Background Refetch) */}
+            {loading && !initialLoading && (
+              <div className="absolute top-8 right-8 flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full shadow-sm border border-white/20">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span className="text-xs font-semibold text-white">Sinkronisasi...</span>
+              </div>
+            )}
           </div>
 
-          {/* Stats */}
-          <ComplaintsStats stats={stats} filter={filter} onFilterChange={setFilter} />
+          {/* Filter Controls */}
+          <FilterControls
+            filters={filters}
+            onFilterChange={setFilters}
+            dateFrom={dateFrom}
+            onDateFromChange={setDateFrom}
+            dateTo={dateTo}
+            onDateToChange={setDateTo}
+            month={month}
+            onMonthChange={setMonth}
+            year={year}
+            onYearChange={setYear}
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            filterMode={filterMode}
+            onFilterModeChange={setFilterMode}
+            users={users}
+            onReset={handleReset}
+          />
 
-          {/* Complaints List */}
-          <div className="p-6 pt-0">
-            <ComplaintsList list={filteredList} onSelectComplaint={setSelectedComplaint} formatDate={formatDate} />
-          </div>
+          {/* List */}
+          <ComplaintsList
+            list={complaints}
+            onDelete={handleDeleteComplaint}
+            formatDate={formatDate}
+          />
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 p-6 border-t border-white/20 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition font-medium w-full sm:w-auto"
+              >
+                ← Sebelumnya
+              </button>
+              <span className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
+                Halaman <span className="text-blue-600 dark:text-blue-400">{page}</span> dari <span className="text-blue-600 dark:text-blue-400">{totalPages}</span>
+              </span>
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="px-6 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition font-medium w-full sm:w-auto"
+              >
+                Selanjutnya →
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Detail Modal */}
-      <ComplaintsDetailModal
-        complaint={selectedComplaint}
-        onClose={() => setSelectedComplaint(null)}
-        onStatusChange={(id, status) => {
-          updateStatus(id, status);
-          setSelectedComplaint((prev) => (prev ? { ...prev, status } : null));
-        }}
-        onDelete={deleteComplaint}
-        formatDate={formatDate}
-      />
-
-      <style jsx>{`
-        @keyframes fade-in-up {
-          0% {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.5s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { FileText, MapPin, User, Clock, Star } from "lucide-react";
+
 type Complaint = {
   id: string;
   title: string;
@@ -13,38 +16,28 @@ type Complaint = {
       name?: string;
     };
   };
+  rating?: number;
+  feedback_message?: string;
+  admin_reply?: string;
 };
 
 const statuses = [
-  { value: "open", label: "Dibuka", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-  { value: "in-progress", label: "Sedang Diproses", color: "bg-blue-100 text-blue-800 border-blue-200" },
-  { value: "resolved", label: "Selesai", color: "bg-green-100 text-green-800 border-green-200" },
-  { value: "rejected", label: "Ditolak", color: "bg-red-100 text-red-800 border-red-200" },
+  { value: "menunggu", label: "Menunggu", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  { value: "diproses", label: "Diproses", color: "bg-blue-100 text-blue-800 border-blue-200" },
+  { value: "selesai", label: "Selesai", color: "bg-green-100 text-green-800 border-green-200" },
 ];
 
 type ComplaintsListProps = {
   list: Complaint[];
-  onSelectComplaint: (complaint: Complaint) => void;
+  onDelete: (id: string) => void;
   formatDate: (dateStr: string) => string;
 };
 
-export default function ComplaintsList({ list, onSelectComplaint, formatDate }: ComplaintsListProps) {
+export default function ComplaintsList({ list, onDelete, formatDate }: ComplaintsListProps) {
   if (list.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-16 text-center dark:border-zinc-700">
-        <svg
-          className="mb-4 h-16 w-16 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
+        <FileText className="mb-4 h-16 w-16 text-gray-400" />
         <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
           Belum ada pengaduan
         </p>
@@ -76,10 +69,10 @@ export default function ComplaintsList({ list, onSelectComplaint, formatDate }: 
               </div>
               <span
                 className={`ml-4 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${
-                  statuses.find((s) => s.value === complaint.status)?.color
+                  statuses.find((s) => s.value === complaint.status)?.color || statuses[0].color
                 }`}
               >
-                {statuses.find((s) => s.value === complaint.status)?.label}
+                {statuses.find((s) => s.value === complaint.status)?.label || statuses[0].label}
               </span>
             </div>
 
@@ -87,62 +80,52 @@ export default function ComplaintsList({ list, onSelectComplaint, formatDate }: 
             <div className="flex flex-wrap items-center gap-4">
               {complaint.location && (
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  </svg>
+                  <MapPin className="h-4 w-4" />
                   <span className="font-medium">{complaint.location}</span>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-4">
-              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-4 mt-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+                  <User className="h-4 w-4" />
                   <span>{complaint.expand?.creator?.name || complaint.expand?.creator?.email || "-"}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <Clock className="h-4 w-4" />
                   <span>{formatDate(complaint.created)}</span>
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <button
-                onClick={() => onSelectComplaint(complaint)}
-                className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-blue-700/50 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
-              >
-                Detail
-              </button>
+              {/* Feedback Notif */}
+              {complaint.status === "selesai" && complaint.rating && !complaint.admin_reply && (
+                <div className="text-xs text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-1 rounded inline-flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 fill-current" /> Menunggu balasan admin
+                </div>
+              )}
             </div>
 
-            {/* Progress bar untuk yang in-progress */}
-            {complaint.status === "in-progress" && (
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Link
+                  href={`/admin/complaints/detail/${complaint.id}`}
+                  className="rounded-lg border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-blue-700/50 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+                >
+                  Detail
+                </Link>
+                <button
+                  onClick={() => onDelete(complaint.id)}
+                  className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-all duration-200 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500/50 dark:border-red-700/50 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+
+            {/* Progress bar untuk yang diproses */}
+            {complaint.status === "diproses" && (
               <div className="mt-2">
                 <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-zinc-700">
                   <div
@@ -153,8 +136,8 @@ export default function ComplaintsList({ list, onSelectComplaint, formatDate }: 
               </div>
             )}
 
-            {/* Animasi pulse untuk yang open */}
-            {complaint.status === "open" && (
+            {/* Animasi pulse untuk yang menunggu */}
+            {complaint.status === "menunggu" && (
               <div className="absolute right-4 top-4">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"></span>

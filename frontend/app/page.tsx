@@ -1,26 +1,50 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { pb } from "../lib/pocketbase";
 
 export default function Home() {
   const router = useRouter();
+  const [resolvedCount, setResolvedCount] = useState<number>(0);
 
   useEffect(() => {
+    // 1. Cek User Auth
     const user = pb.authStore.model;
     if (user?.isAdmin) {
       router.push("/admin");
     }
+
+    // 2. Definisi fungsi Fetch
+    const fetchStats = async () => {
+      try {
+        // Mengambil jumlah data dengan status selesai
+        // Kita masukkan beberapa variasi filter agar tidak meleset (case sensitive)
+        const result = await pb.collection("complaints").getList(1, 1, {
+          filter: 'status = "selesai"',
+          fields: "totalItems",
+          requestKey: null // Mencegah error autocancel jika page di-refresh cepat
+        });
+        
+        setResolvedCount(result.totalItems);
+      } catch (error) {
+        // Jika error 403 muncul di console, berarti API Rules "List" di PocketBase belum Public
+        console.error("Gagal ambil stats:", error);
+      }
+    };
+
+    // 3. PANGGIL fungsinya (Ini yang tadi ketinggalan)
+    fetchStats();
+    
   }, [router]);
 
   return (
     <>
       {/* Elemen dekoratif latar */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-purple-300 opacity-30 blur-3xl filter dark:bg-purple-800" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300 opacity-30 blur-3xl filter dark:bg-blue-800" />
-        <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-300 opacity-20 blur-3xl filter dark:bg-pink-800" />
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-purple-300 opacity-30 blur-3xl filter dark:bg-purple-800/20" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300 opacity-30 blur-3xl filter dark:bg-blue-800/20" />
+        <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-300 opacity-20 blur-3xl filter dark:bg-pink-800/20" />
       </div>
 
       <main className="relative flex min-h-screen items-center justify-center px-4 font-sans">
@@ -59,33 +83,35 @@ export default function Home() {
             style={{ animationDelay: "0.4s", animationFillMode: "both" }}
           >
             <a
-              href="/complaints"
-              className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
+              href="/siswa/complaints/create"
+              className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4 text-center text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
             >
               <span className="relative z-10">Buat Pengaduan</span>
               <div className="absolute inset-0 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </a>
             <a
-              href="/chat"
-              className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
+              href="/siswa/chat"
+              className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-center text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
             >
               <span className="relative z-10">Chat dengan Admin</span>
               <div className="absolute inset-0 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </a>
           </div>
 
-          {/* Statistik mini (opsional, memberi kesan hidup) */}
+          {/* Statistik mini */}
           <div
             className="animate-fade-in-up flex flex-wrap items-center justify-center gap-8 pt-12 text-sm text-gray-500 dark:text-gray-400 sm:justify-start"
             style={{ animationDelay: "0.5s", animationFillMode: "both" }}
           >
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span>+500 pengaduan terselesaikan</span>
+              <div className={`h-2 w-2 rounded-full ${resolvedCount > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+              <span className="font-medium">
+                {resolvedCount > 0 ? `+${resolvedCount} pengaduan terselesaikan` : 'Siap melayani pengaduan'}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-blue-500" />
-              <span>24/7 dukungan admin</span>
+              <span>Dukungan admin 24/7</span>
             </div>
           </div>
         </div>

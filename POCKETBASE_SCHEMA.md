@@ -100,7 +100,15 @@ Collection untuk pengaduan sarana sekolah.
 | `id` | text (primary key) | ✓ | ID unik otomatis dari PocketBase |
 | `title` | text | ✓ | Judul pengaduan |
 | `description` | text | ✓ | Deskripsi detail |
-| `status` | text | ✗ | Status: `open`, `in-progress`, `closed` (default: `open`) |
+| `category` | select | ✓ | Kategori: AC Rusak, Lantai Retak, Atap Bocor, etc |
+| `location` | text | ✓ | Lokasi pengaduan (Kelas A, Perpustakaan, dll) |
+| `priority` | select | ✗ | Prioritas: low, medium, high (default: medium) |
+| `status` | text | ✗ | Status: `open`, `in-progress`, `resolved`, `rejected` |
+| `photo` | files | ✗ | Foto bukti pengaduan |
+| `feedback` | text | ✗ | Umpan balik/progress update dari admin |
+| `deadline` | date | ✗ | Target tanggal penyelesaian |
+| `estimated_cost` | number | ✗ | Estimasi biaya perbaikan |
+| `creator` | relation | ✓ | Referensi ke users (yang membuat) |
 | `created` | autodate | ✓ | Timestamp pembuatan |
 | `updated` | autodate | ✓ | Timestamp perubahan terakhir |
 
@@ -113,7 +121,15 @@ Collection untuk pengaduan sarana sekolah.
   "updated": "2026-03-03T08:00:00.000Z",
   "title": "Lantai rusak di kelas A",
   "description": "Lantai retak dan berbahaya, mohon segera diperbaiki.",
-  "status": "open"
+  "category": "Lantai Retak",
+  "location": "Kelas A",
+  "priority": "high",
+  "status": "in-progress",
+  "photo": ["photo_uuid_1"],
+  "feedback": "Sudah dilaporkan ke maintenance. Target penyelesaian: 1 minggu.",
+  "deadline": "2026-03-10T23:59:59Z",
+  "estimated_cost": 500000,
+  "creator": "user_student_1"
 }
 ```
 

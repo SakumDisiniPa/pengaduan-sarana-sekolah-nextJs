@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { pb } from "../../lib/pocketbase";
+import { pb } from "@/lib/pocketbase";
 
 type User = {
   id: string;
@@ -32,7 +32,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!user) {
-      router.push("/login");
+      router.push("/siswa/login");
       return;
     }
 
@@ -118,7 +118,7 @@ export default function ChatPage() {
       mounted = false;
       if (unsubscribe) unsubscribe();
     };
-  }, [user, router]);
+  }, [user?.id, router]);
 
   const send = async () => {
     if (!text.trim() || !user) return;
