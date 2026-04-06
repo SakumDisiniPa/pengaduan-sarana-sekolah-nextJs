@@ -8,26 +8,6 @@ Root path: /home/sakum-disini-pa/Documents/pengaduan-sarana-sekolah-nextJs
 │   ├── 📁 pb_data/
 │   │   ├── 📁 backups/
 │   │   ├── 📁 storage/
-│   │   │   ├── 📁 _pb_users_auth_/
-│   │   │   │   ├── 📁 6p8729wzdskxv24/
-│   │   │   │   │   ├── 📁 thumbs_acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png/
-│   │   │   │   │   │   ├── 🖼️ 100x100_acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png
-│   │   │   │   │   │   └── 📄 100x100_acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png.attrs
-│   │   │   │   │   ├── 🖼️ acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png
-│   │   │   │   │   └── 📄 acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png.attrs
-│   │   │   │   ├── 📁 9k4znhet40f2tmh/
-│   │   │   │   │   ├── 📁 thumbs_aji_restu_murdiansah_q3ok5z7s2e.jpg/
-│   │   │   │   │   │   ├── 🖼️ 100x100_aji_restu_murdiansah_q3ok5z7s2e.jpg
-│   │   │   │   │   │   └── 📄 100x100_aji_restu_murdiansah_q3ok5z7s2e.jpg.attrs
-│   │   │   │   │   ├── 🖼️ aji_restu_murdiansah_q3ok5z7s2e.jpg
-│   │   │   │   │   └── 📄 aji_restu_murdiansah_q3ok5z7s2e.jpg.attrs
-│   │   │   │   └── 📁 e9f7n9vygsf7g56/
-│   │   │   │       ├── 🖼️ bimasakti_bachtiar_u551xbft9x.jpg
-│   │   │   │       └── 📄 bimasakti_bachtiar_u551xbft9x.jpg.attrs
-│   │   │   └── 📁 pbc_1592434602/
-│   │   │       └── 📁 ohlwcki7b436s5o/
-│   │   │           ├── 🖼️ chat_gpt_image_oct_6_2025_03_40_08_pm_8peh7dqtz2.png
-│   │   │           └── 📄 chat_gpt_image_oct_6_2025_03_40_08_pm_8peh7dqtz2.png.attrs
 │   │   ├── 📄 auxiliary.db
 │   │   └── 📄 data.db
 │   ├── ⚙️ .gitignore
@@ -215,7 +195,6 @@ Root path: /home/sakum-disini-pa/Documents/pengaduan-sarana-sekolah-nextJs
 ├── 📝 README_IMPLEMENTATION.md
 ├── 📝 SCHEMA_FIX_GUIDE.md
 ├── 📝 SETUP_GUIDE.md
-├── ⚙️ STRUKTUR_FOLDER_LENGKAP.xml
 ├── 📝 SUMMARY_AUDIT.md
 └── 📝 VERIFICATION_CHECKLIST.md
 
