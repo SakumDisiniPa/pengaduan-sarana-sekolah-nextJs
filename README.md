@@ -433,7 +433,7 @@ pengaduan-sarana-sekolah-nextJs/
 
 ### Prerequisites
 - Go 1.20+: https://golang.org/dl
-- Node.js 18+: https://nodejs.org/
+- Node.js 22+: https://nodejs.org/
 
 ### 1. Start Backend
 
