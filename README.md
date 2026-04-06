@@ -267,10 +267,14 @@ pengaduan-sarana-sekolah-nextJs/
 ├── 📝 SCHEMA_FIX_GUIDE.md
 ├── 📝 SETUP_GUIDE.md
 ├── 📝 SUMMARY_AUDIT.md
-└── 📝 VERIFICATION_CHECKLIST.md  - Filter by status (Menunggu, Diproses, Selesai)
-  - Search text dalam title/description
-  - Sort by date (newest/oldest)
-  - Pagination untuk performa
+└── 📝 VERIFICATION_CHECKLIST.md
+
+```
+
+- Filter by status (Menunggu, Diproses, Selesai)
+- Search text dalam title/description
+- Sort by date (newest/oldest)
+- Pagination untuk performa
 
 #### Real-time Chat
 - Direct messaging dengan admin
@@ -425,40 +429,6 @@ pengaduan-sarana-sekolah-nextJs/
 
 ---
 
-```
-webntahlah/
-├── backend/                        # Go + PocketBase backend
-│   ├── main.go                     # Server entry point
-│   ├── go.mod                      # Go module definition
-│   ├── README.md                   # Backend documentation
-│   └── pb_export.json              # Database schema (export/import)
-│
-├── frontend/                       # Next.js React frontend
-│   ├── app/
-│   │   ├── layout.tsx              # Root layout (server)
-│   │   ├── page.tsx                # Homepage
-│   │   ├── login/page.tsx          # Login page
-│   │   ├── register/page.tsx       # Register page
-│   │   ├── complaints/page.tsx     # User complaints
-│   │   ├── chat/page.tsx           # User chat with admin
-│   │   ├── admin/
-│   │   │   ├── chats/page.tsx      # Admin: manage chats
-│   │   │   └── complaints/page.tsx # Admin: manage complaints
-│   │   └── components/
-│   │       └── Header.tsx          # Navigation header
-│   ├── lib/
-│   │   └── pocketbase.ts           # PocketBase client
-│   ├── package.json                # npm dependencies
-│   └── README.md                   # Frontend docs
-│
-├── POCKETBASE_SCHEMA.md            # Database schema documentation
-├── SETUP_GUIDE.md                  # How to run locally
-└── README.md (ini)                 # Project overview
-
-```
-
----
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -584,56 +554,75 @@ Access: http://localhost:3000
 
 ### As Regular User:
 
-1. **Register**
-   - Click "Register"
-   - Email: `user@example.com`, Password: `password123`
-   - Auto-login to chat page
+1. **Registration & Login**
+   - Click "Login Siswa"
+   - **Register**: Gunakan tombol "Login with Google" untuk pendaftaran akun baru (Sistem registrasi manual telah dihapus).
+   - **Masuk Profile** : Masuk ke Profile untuk mengatur password agar bisa login menggunakan NIS dan password yang sudah diatur wajib mengktifkan MFA.
+   - **Login**: Masuk menggunakan NIS atau Email Sekolah (`@smkn1padaherang.sch.id`) dan Password.
+   - **MFA**: Masukkan kode verifikasi dua langkah (Two-Step Verification) jika fitur keamanan ini diaktifkan.
+   - Auto-login ke halaman siswa/dashboard.
 
 2. **Make Complaint**
-   - From header, click "Home" then "Buat Pengaduan"
-   - Fill form: Title & Description
+   - From header, click "Home" kemudian "Buat Pengaduan"
+   - Isi form: Judul, Deskripsi, Kategori, Prioritas, dan Foto Bukti.
    - Click "Kirim Pengaduan"
-   - See status updates in real-time
+   - Pantau pembaruan status secara real-time.
 
 3. **Chat with Admin**
-   - Click "Chat" in header
-   - Type message & press Enter
-   - See admin replies in real-time
+   - Click "Chat" di header
+   - Ketik pesan & tekan Enter
+   - Lihat balasan admin secara real-time.
 
 ### As Admin:
 
 1. **Login**
    - Email: `admin@example.com`, Password: `password123`
+   - Mendukung verifikasi dua langkah (MFA) untuk keamanan ekstra.
 
 2. **Manage Complaints**
-   - Click "Complaints" in header
-   - See all complaints from all users
-   - Update status for each complaint
-   - Changes update in real-time for users
+   - Click "Complaints" di header
+   - Lihat seluruh pengaduan dari semua pengguna
+   - Perbarui status untuk setiap pengaduan (Menunggu, Diproses, Selesai)
+   - Perubahan status terupdate secara real-time di sisi pengguna.
 
 3. **Chat with Users**
-   - Click "Admin Chat" in header
-   - Select user from dropdown
-   - Type reply
-   - Messages appear in user's chat instantly
+   - Click "Admin Chat" di header
+   - Pilih pengguna dari sidebar
+   - Balas pesan pengguna
+   - Pesan muncul secara instan di chat pengguna.
 
 ---
 
 ## 📚 Documentation
 
-- **[POCKETBASE_SCHEMA.md](./POCKETBASE_SCHEMA.md)** – Complete database schema, fields, rules, API endpoints
-- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** – Detailed setup, troubleshooting, deployment
-- **[backend/README.md](./backend/README.md)** – Backend-specific documentation
-- **[frontend/README.md](./frontend/README.md)** – Frontend-specific documentation
+- **[POCKETBASE_SCHEMA.md](./POCKETBASE_SCHEMA.md)** – Skema database lengkap, field, rules, dan API endpoints.
+- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** – Panduan instalasi mendalam, troubleshooting, dan deployment.
+- **[QUICK_START_SOP.md](./QUICK_START_SOP.md)** – Standar Operasional Prosedur untuk memulai dengan cepat.
+- **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** – Panduan detail implementasi fitur dan logika.
+- **[ONESIGNAL_SETUP.md](./ONESIGNAL_SETUP.md)** – Konfigurasi sistem push notification.
+- **[ONESIGNAL_DEBUGGING_GUIDE.md](./ONESIGNAL_DEBUGGING_GUIDE.md)** – Panduan troubleshooting notifikasi OneSignal.
+- **[INTEGRATION_CHECKLIST.md](./INTEGRATION_CHECKLIST.md)** – Daftar periksa integrasi sistem secara menyeluruh.
+- **[VERIFICATION_CHECKLIST.md](./VERIFICATION_CHECKLIST.md)** – Langkah-langkah verifikasi akhir sistem.
+- **[IMPLEMENTATION_ANALYSIS.md](./IMPLEMENTATION_ANALYSIS.md)** – Analisis teknis dari implementasi yang telah dilakukan.
+- **[SUMMARY_AUDIT.md](./SUMMARY_AUDIT.md)** – Audit proyek dan ringkasan status saat ini.
+- **[SCHEMA_FIX_GUIDE.md](./SCHEMA_FIX_GUIDE.md)** – Panduan perbaikan masalah skema database.
+- **[ONESIGNAL_FIX_DOCUMENTATION.md](./ONESIGNAL_FIX_DOCUMENTATION.md)** – Dokumentasi perbaikan spesifik terkait OneSignal.
+- **[README_IMPLEMENTATION.md](./README_IMPLEMENTATION.md)** – Catatan tambahan mengenai implementasi README.
+- **[CHAT_NOTIFICATION_EXAMPLE.md](./CHAT_NOTIFICATION_EXAMPLE.md)** – Contoh log untuk notifikasi chat.
+- **[COMPLAINT_NEW_NOTIFICATION_EXAMPLE.md](./COMPLAINT_NEW_NOTIFICATION_EXAMPLE.md)** – Contoh log untuk pengaduan baru.
+- **[COMPLAINT_STATUS_UPDATE_NOTIFICATION_EXAMPLE.md](./COMPLAINT_STATUS_UPDATE_NOTIFICATION_EXAMPLE.md)** – Contoh log untuk pembaruan status.
+- **[backend/README.md](./backend/README.md)** – Dokumentasi spesifik untuk bagian Backend (Go).
+- **[frontend/README.md](./frontend/README.md)** – Dokumentasi spesifik untuk bagian Frontend (Next.js).
 
 ---
 
 ## 🔐 Security & Permissions
 
 ### Authentication
-- User registration & login via `users` collection
-- Passwords hashed automatically by PocketBase
-- JWT tokens for session management
+- **OAuth Google**: Satu-satunya metode pendaftaran akun baru untuk memastikan validitas pengguna.
+- **Domain Restriction**: Hanya email dengan domain `@smkn1padaherang.sch.id` (atau NIS yang valid) yang dapat melakukan autentikasi.
+- **Two-Step Verification (MFA)**: Menggunakan TOTP untuk lapisan keamanan tambahan.
+- **JWT tokens** untuk manajemen sesi yang aman dan efisien.
 
 ### Authorization Rules (PocketBase Rules)
 
@@ -649,54 +638,57 @@ Chats:
   - Only sender or admin can DELETE
 ```
 
-See [POCKETBASE_SCHEMA.md](./POCKETBASE_SCHEMA.md) for complete rule definitions.
+Lihat [POCKETBASE_SCHEMA.md](./POCKETBASE_SCHEMA.md) untuk definisi aturan lengkap.
 
 ---
 
 ## 🔧 API Endpoints
 
-All endpoints auto-generated by PocketBase at `http://localhost:8090/api/`
+Seluruh endpoint dihasilkan secara otomatis oleh PocketBase di `http://localhost:8090/api/`
 
 ### Collections:
 - `GET/POST /api/collections/complaints/records`
 - `GET/POST /api/collections/chats/records`
 - `POST /api/collections/users/auth-with-password`
+- `POST /api/collections/users/auth-with-oauth2`
 
-See [POCKETBASE_SCHEMA.md](./POCKETBASE_SCHEMA.md#api-endpoints) for full list.
+Lihat [POCKETBASE_SCHEMA.md](./POCKETBASE_SCHEMA.md#api-endpoints) untuk daftar lengkapnya.
 
 ---
 
 ## 📱 Responsive Design
 
-- **Mobile-first** TailwindCSS components
-- **Touch-friendly** buttons & forms
-- Tested on: Chrome, Firefox, Safari, Mobile browsers
+- **Mobile-first approach** menggunakan komponen TailwindCSS.
+- **Touch-friendly** untuk tombol dan elemen form.
+- **Lucide React** digunakan untuk ikonografi yang konsisten, modern, dan ringan.
+- Diuji pada: Chrome, Firefox, Safari, dan Mobile browsers.
 
 ---
 
 ## 🐛 Troubleshooting
 
-| Problem | Solution |
+| Masalah | Solusi |
 |---------|----------|
-| "Cannot connect to PocketBase" | Backend must be running: `go run main.go` |
-| "Collection not found" | Import `pb_export.json` or create collections manually |
-| Chat/Complaints not updating | Refresh page or check browser console (F12) |
-| Admin menu not visible | Login with admin user (`isAdmin = true`) |
-| Port already in use | Change port in run command (see SETUP_GUIDE.md) |
+| "Cannot connect to PocketBase" | Pastikan Backend berjalan: `go run main.go` |
+| "Collection not found" | Impor `pb_export.json` atau buat koleksi secara manual |
+| Chat/Pengaduan tidak update | Refresh halaman atau cek konsol browser (F12) |
+| Menu Admin tidak muncul | Login dengan akun admin (`isAdmin = true`) |
+| Port sudah digunakan | Ubah port pada perintah jalankan (lihat SETUP_GUIDE.md) |
+| "Google Login Gagal" | Periksa `.env.local` untuk `NEXT_PUBLIC_POCKETBASE_URL` dan pengaturan OAuth di PocketBase |
 
-More troubleshooting: [SETUP_GUIDE.md#troubleshooting](./SETUP_GUIDE.md#troubleshooting)
+Troubleshooting lebih lanjut: [SETUP_GUIDE.md#troubleshooting](./SETUP_GUIDE.md#troubleshooting)
 
 ---
 
 ## 📝 License
 
-Educational project for school complaint system.
+Proyek edukasi untuk sistem pengaduan sarana sekolah.
 
 ---
 
 ## 👤 Author
 
-Built with ❤️ using Go, Next.js, and PocketBase.
+Dibangun dengan ❤️ menggunakan Go, Next.js, PocketBase, dan Lucide React.
 
 ---
 
@@ -705,26 +697,27 @@ Built with ❤️ using Go, Next.js, and PocketBase.
 - [PocketBase Documentation](https://pocketbase.io/docs/)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Go Documentation](https://golang.org/doc/)
-- [TailwindCSS](https://tailwindcss.com/docs)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [Lucide React Documentation](https://lucide.dev/guide/)
 
 ---
 
 ## ✅ Testing Checklist
 
-- [ ] Backend running on `http://localhost:8090`
-- [ ] Frontend running on `http://localhost:3000`
-- [ ] Can register new user
-- [ ] Can login as user
-- [ ] Can submit complaint
-- [ ] Can send chat message
-- [ ] Admin user created with `isAdmin = true`
-- [ ] Admin can see all complaints
-- [ ] Admin can update complaint status
-- [ ] Admin can reply to user chat
-- [ ] User sees real-time updates
+- [ ] Backend berjalan di `http://localhost:8090`
+- [ ] Frontend berjalan di `http://localhost:3000`
+- [ ] Dapat mendaftar/login melalui Google OAuth
+- [ ] Dapat login dengan NIS/Email + Verifikasi Dua Langkah (MFA)
+- [ ] Dapat mengirim pengaduan dengan lampiran foto
+- [ ] Dapat mengirim pesan chat dan menerima notifikasi real-time
+- [ ] Akun admin berhasil dibuat dengan `isAdmin = true`
+- [ ] Admin dapat melihat dan memfilter seluruh pengaduan
+- [ ] Admin dapat memperbarui status pengaduan & memberikan feedback
+- [ ] Admin dapat membalas chat pengguna secara instan
+- [ ] Pengguna menerima pembaruan real-time dan notifikasi
 
 ---
 
-**Ready to test?** Follow [SETUP_GUIDE.md](./SETUP_GUIDE.md) for step-by-step setup.
+**Siap untuk mencoba?** Ikuti [SETUP_GUIDE.md](./SETUP_GUIDE.md) untuk langkah setup mendetail.
 
 Happy coding! 🚀
