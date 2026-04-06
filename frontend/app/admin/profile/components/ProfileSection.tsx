@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { getInitialLetter } from "../utils";
-import { User } from "lucide-react";
+import { User, Pencil, X } from "lucide-react";
 
 interface ProfileSectionProps {
   name: string;
@@ -22,11 +22,12 @@ export function ProfileSection({
   isSaving,
 }: ProfileSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-2xl shadow-xl backdrop-blur-md p-6 sm:p-8 flex flex-col h-full overflow-hidden">
       <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <User className="w-5 h-5" /> Data Profil
+        <User className="w-5 h-5" /> Data Profil Admin
       </h2>
 
       <form onSubmit={onSubmit} className="flex-1 flex flex-col">
@@ -34,8 +35,8 @@ export function ProfileSection({
         <div className="mb-8 flex flex-col items-center">
           <div
             className="relative group cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-            title="Klik untuk ubah foto"
+            onClick={() => setIsModalOpen(true)}
+            title="Klik untuk lihat detail"
           >
             {/* Foto Profile */}
             <div className="w-24 h-24 rounded-full border-2 border-purple-500/50 shadow-lg overflow-hidden bg-slate-800 flex items-center justify-center group-hover:border-purple-400 transition-all">
@@ -44,7 +45,6 @@ export function ProfileSection({
                   src={avatarUrl}
                   alt="Profile"
                   className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
-                  // Menangani jika link gambar rusak
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
@@ -56,10 +56,10 @@ export function ProfileSection({
               )}
             </div>
 
-            {/* Overlay Ubah Foto */}
+            {/* Overlay */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-full">
               <span className="text-white text-[10px] font-bold uppercase tracking-wider">
-                Ubah
+                Lihat
               </span>
             </div>
           </div>
@@ -69,12 +69,59 @@ export function ProfileSection({
             accept="image/*"
             className="hidden"
             ref={fileInputRef}
-            onChange={onAvatarChange}
+            onChange={(e) => {
+              onAvatarChange(e);
+              setIsModalOpen(false);
+            }}
           />
           <p className="mt-3 text-[11px] text-slate-400 font-medium">
-            Klik foto untuk mengganti
+            Klik foto untuk melihat detail
           </p>
         </div>
+
+        {/* Modal Preview */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="relative w-full max-w-sm aspect-[3/4] bg-slate-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Full Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
+                   <User className="w-32 h-32 text-slate-600 mb-4" />
+                   <p className="text-slate-400">Belum ada foto profil</p>
+                </div>
+              )}
+
+              {/* Floating Edit Button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center shadow-xl transition-transform active:scale-95 group/btn"
+                title="Ganti Foto"
+              >
+                <Pencil className="w-6 h-6 text-white group-hover/btn:rotate-12 transition-transform" />
+              </button>
+            </div>
+
+            {/* Click outside to close */}
+            <div 
+              className="absolute inset-0 -z-10" 
+              onClick={() => setIsModalOpen(false)}
+            />
+          </div>
+        )}
 
         {/* Form Fields */}
         <div className="space-y-5 flex-1">

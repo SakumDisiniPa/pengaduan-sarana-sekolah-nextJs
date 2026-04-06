@@ -3,7 +3,7 @@
 import { useEffect, useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { pb } from "../../lib/pocketbase";
+import { pb } from "@/lib/pocketbase";
 import { Menu, Transition } from "@headlessui/react";
 import { Menu as MenuIcon, X, User, LogOut } from "lucide-react";
 

@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
+import { notifyAdminsOfNewChat } from "@/app/admin/chats/hooks/useNotifications";
+
 
 type User = {
   id: string;
@@ -24,7 +26,9 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatRecord[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [admins, setAdmins] = useState<User[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,6 +42,18 @@ export default function ChatPage() {
 
     let mounted = true;
     let unsubscribe: (() => void) | null = null;
+
+    const fetchAdmins = async () => {
+      try {
+        const adminList = await pb.collection("users").getFullList({
+          filter: "isAdmin = true",
+        });
+        if (mounted) setAdmins(adminList as any);
+      } catch (err) {
+        console.error("Failed to fetch admins for notifications:", err);
+      }
+    };
+
 
     const init = async () => {
       const makeFilter = () => {
@@ -112,7 +128,9 @@ export default function ChatPage() {
       }
     };
 
+    fetchAdmins();
     init();
+
 
     return () => {
       mounted = false;
@@ -127,11 +145,23 @@ export default function ChatPage() {
         text: text.trim(),
         sender: user.id,
       };
-      await pb.collection("chats").create(data);
+      const newMessage = await pb.collection("chats").create(data);
+      
+      // Kirim notifikasi ke semua admin
+      if (admins.length > 0) {
+        try {
+          await notifyAdminsOfNewChat(user, text.trim(), admins);
+          console.log("Admins notified of new chat from student");
+        } catch (notificationError) {
+          console.warn("Notification error (non-blocking):", notificationError);
+        }
+      }
+      
       setText("");
     } catch (err) {
       console.error(err);
     }
+
   };
 
   const formatTime = (dateStr: string) => {

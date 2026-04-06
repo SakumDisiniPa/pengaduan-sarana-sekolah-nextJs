@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { pb } from "../../../../lib/pocketbase";
+import { sendChatNotification } from "./useNotifications";
 import type { User } from "../types";
 
 export const useSendMessage = (admin: User | null | undefined) => {
@@ -12,11 +13,24 @@ export const useSendMessage = (admin: User | null | undefined) => {
 
     setSending(true);
     try {
+      // 1. Create message
       await pb.collection("chats").create({
         text: text.trim(),
         sender: admin?.id,
         recipient: selectedUser.id,
       });
+
+      // 2. Send notification to recipient
+      if (admin) {
+        try {
+          await sendChatNotification(selectedUser, admin, text.trim());
+          console.log("Notification sent to student:", selectedUser.email);
+        } catch (notificationError) {
+          // Non-blocking error
+          console.warn("Notification error:", notificationError);
+        }
+      }
+
       setSending(false);
       return true;
     } catch (err) {
@@ -28,3 +42,4 @@ export const useSendMessage = (admin: User | null | undefined) => {
 
   return { send, sending };
 };
+

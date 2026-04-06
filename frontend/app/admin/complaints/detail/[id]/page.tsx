@@ -12,6 +12,8 @@ import {
   updateComplaintStatus,
   sendAdminReply,
 } from "../../utils";
+import { notifyComplaintStatusChange } from "../../hooks/useNotifications";
+
 
 export default function AdminComplaintDetail() {
   const params = useParams();
@@ -58,7 +60,26 @@ export default function AdminComplaintDetail() {
     try {
       await updateComplaintStatus(id, newStatus);
       setCurrentStatus(newStatus);
+
+      // Trigger Notification (non-blocking)
+      try {
+        const creatorId = typeof complaint.creator === "string" 
+          ? complaint.creator 
+          : complaint.creator?.id;
+
+        if (creatorId) {
+          await notifyComplaintStatusChange(
+            complaint as any, 
+            creatorId, 
+            newStatus
+          );
+          console.log(`Notification sent to student for status: ${newStatus}`);
+        }
+      } catch (notifErr) {
+        console.warn("Notification error (non-blocking):", notifErr);
+      }
     } catch (err) {
+
       // Error already handled in service
     } finally {
       setIsUpdatingStatus(false);

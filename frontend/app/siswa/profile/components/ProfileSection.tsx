@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { getInitialLetter } from "../utils";
-import { User } from "lucide-react";
+import { User, Pencil, X } from "lucide-react";
 
 interface ProfileSectionProps {
   name: string;
@@ -22,6 +22,7 @@ export function ProfileSection({
   isSaving,
 }: ProfileSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-2xl shadow-xl backdrop-blur-md p-6 sm:p-8 flex flex-col h-full">
@@ -30,10 +31,11 @@ export function ProfileSection({
       </h2>
 
       <form onSubmit={onSubmit} className="flex-1 flex flex-col">
+        {/* Avatar Display */}
         <div className="mb-8 flex flex-col items-center">
           <div
             className="relative group cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setIsModalOpen(true)}
           >
             {avatarPreview ? (
               <img
@@ -50,7 +52,7 @@ export function ProfileSection({
             )}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <span className="text-white drop-shadow-md pb-1 font-medium bg-black/50 rounded-full px-2 text-xs">
-                Ubah Foto
+                Lihat Foto
               </span>
             </div>
           </div>
@@ -59,12 +61,59 @@ export function ProfileSection({
             accept="image/*"
             className="hidden"
             ref={fileInputRef}
-            onChange={onAvatarChange}
+            onChange={(e) => {
+              onAvatarChange(e);
+              setIsModalOpen(false); // Close modal after selection
+            }}
           />
           <p className="mt-2 text-xs text-slate-400">
-            Klik untuk mengubah foto cover
+            Klik foto untuk melihat detail
           </p>
         </div>
+
+        {/* Modal Preview */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="relative w-full max-w-sm aspect-[3/4] bg-slate-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Full Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
+                   <User className="w-32 h-32 text-slate-600 mb-4" />
+                   <p className="text-slate-400">Belum ada foto profil</p>
+                </div>
+              )}
+
+              {/* Floating Edit Button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-6 right-6 w-14 h-14 bg-purple-600 hover:bg-purple-500 rounded-full flex items-center justify-center shadow-xl transition-transform active:scale-95 group/btn"
+                title="Ganti Foto"
+              >
+                <Pencil className="w-6 h-6 text-white group-hover/btn:rotate-12 transition-transform" />
+              </button>
+            </div>
+
+            {/* Click outside to close */}
+            <div 
+              className="absolute inset-0 -z-10" 
+              onClick={() => setIsModalOpen(false)}
+            />
+          </div>
+        )}
 
         <div className="space-y-4 flex-1">
           <div>
@@ -115,3 +164,4 @@ export function ProfileSection({
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
 import { useCategories } from "@/lib/categories";
+import { notifyAdminsOfNewComplaint, Complaint } from "@/app/admin/complaints/hooks/useNotifications";
 import Link from "next/link";
 
 export default function UserComplaintCreate() {
@@ -62,7 +63,25 @@ export default function UserComplaintCreate() {
         formData.append("photo", photoFile);
       }
 
-      await pb.collection("complaints").create(formData);
+      // Create complaint
+      const newComplaint = await pb.collection("complaints").create<Complaint>(formData);
+
+      // Send notification to admins (non-blocking)
+      try {
+        const admins = await pb.collection("users").getFullList({
+          filter: 'isAdmin = true',
+          fields: 'id,email,name,isAdmin'
+        });
+        
+        if (admins.length > 0) {
+          await notifyAdminsOfNewComplaint(newComplaint, user as any, admins as any);
+          console.log(`Notifikasi terkirim ke ${admins.length} admin`);
+        }
+      } catch (notifErr) {
+        // Don't block redirect if notification fails
+        console.warn("Notifikasi error (non-blocking):", notifErr);
+      }
+
       router.push("/siswa/dashboard?success=true");
     } catch (err: any) {
       setError("Gagal membuat laporan: " + err.message);

@@ -1,0 +1,222 @@
+File : pengaduan-sarana-sekolah-nextJs
+Generated on: 4/7/2026, 2:23:35 AM
+Root path: /home/sakum-disini-pa/Documents/pengaduan-sarana-sekolah-nextJs
+
+────────────────────────────────────────────────────────────────────────────────
+
+├── 📁 backend/
+│   ├── 📁 pb_data/
+│   │   ├── 📁 backups/
+│   │   ├── 📁 storage/
+│   │   │   ├── 📁 _pb_users_auth_/
+│   │   │   │   ├── 📁 6p8729wzdskxv24/
+│   │   │   │   │   ├── 📁 thumbs_acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png/
+│   │   │   │   │   │   ├── 🖼️ 100x100_acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png
+│   │   │   │   │   │   └── 📄 100x100_acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png.attrs
+│   │   │   │   │   ├── 🖼️ acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png
+│   │   │   │   │   └── 📄 acg8oc_ivd0_xruu1qt_tahv_hkvp36_yjrvd_loxpor_wn739sr6xy_ah1_jg_s96_c_o7lz932o7g_xtg4czvyvb.png.attrs
+│   │   │   │   ├── 📁 9k4znhet40f2tmh/
+│   │   │   │   │   ├── 📁 thumbs_aji_restu_murdiansah_q3ok5z7s2e.jpg/
+│   │   │   │   │   │   ├── 🖼️ 100x100_aji_restu_murdiansah_q3ok5z7s2e.jpg
+│   │   │   │   │   │   └── 📄 100x100_aji_restu_murdiansah_q3ok5z7s2e.jpg.attrs
+│   │   │   │   │   ├── 🖼️ aji_restu_murdiansah_q3ok5z7s2e.jpg
+│   │   │   │   │   └── 📄 aji_restu_murdiansah_q3ok5z7s2e.jpg.attrs
+│   │   │   │   └── 📁 e9f7n9vygsf7g56/
+│   │   │   │       ├── 🖼️ bimasakti_bachtiar_u551xbft9x.jpg
+│   │   │   │       └── 📄 bimasakti_bachtiar_u551xbft9x.jpg.attrs
+│   │   │   └── 📁 pbc_1592434602/
+│   │   │       └── 📁 ohlwcki7b436s5o/
+│   │   │           ├── 🖼️ chat_gpt_image_oct_6_2025_03_40_08_pm_8peh7dqtz2.png
+│   │   │           └── 📄 chat_gpt_image_oct_6_2025_03_40_08_pm_8peh7dqtz2.png.attrs
+│   │   ├── 📄 auxiliary.db
+│   │   └── 📄 data.db
+│   ├── ⚙️ .gitignore
+│   ├── 📝 README.md
+│   ├── 📄 go.mod
+│   ├── 📄 go.sum
+│   ├── 🐹 main.go
+│   └── ⚙️ pb_schema.json
+├── 📁 frontend/
+│   ├── 📁 OneSignalSDK-v16-ServiceWorker/
+│   │   ├── 📁 OneSignalSDK-v16-ServiceWorker/
+│   │   └── 📁 __MACOSX/
+│   │       ├── 📁 OneSignalSDK-v16-ServiceWorker/
+│   │       │   └── 📄 ._OneSignalSDKWorker.js
+│   │       └── ⚙️ ._OneSignalSDK-v16-ServiceWorker
+│   ├── 📁 app/
+│   │   ├── 📁 actions/
+│   │   │   ├── 📄 mfa.ts
+│   │   │   ├── 📄 notifications.ts
+│   │   │   └── 📄 userAuth.ts
+│   │   ├── 📁 admin/
+│   │   │   ├── 📁 chats/
+│   │   │   │   ├── 📁 components/
+│   │   │   │   │   ├── 📄 ChatHeader.tsx
+│   │   │   │   │   ├── 📄 ChatInput.tsx
+│   │   │   │   │   ├── 📄 ChatSidebar.tsx
+│   │   │   │   │   ├── 📄 ContextMenu.tsx
+│   │   │   │   │   ├── 📄 EmptyState.tsx
+│   │   │   │   │   ├── 📄 LoadingState.tsx
+│   │   │   │   │   ├── 📄 MessageBubble.tsx
+│   │   │   │   │   ├── 📄 MessagesList.tsx
+│   │   │   │   │   └── 📄 index.ts
+│   │   │   │   ├── 📁 hooks/
+│   │   │   │   │   ├── 📄 index.ts
+│   │   │   │   │   ├── 📄 useChats.ts
+│   │   │   │   │   ├── 📄 useNotifications.ts
+│   │   │   │   │   └── 📄 useSendMessage.ts
+│   │   │   │   ├── 📁 types/
+│   │   │   │   │   └── 📄 index.ts
+│   │   │   │   ├── 📁 utils/
+│   │   │   │   │   └── 📄 messageHelpers.ts
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 complaints/
+│   │   │   │   ├── 📁 components/
+│   │   │   │   │   ├── 📄 ComplaintsList.tsx
+│   │   │   │   │   ├── 📄 FilterControls.tsx
+│   │   │   │   │   └── 📄 StatusFilter.tsx
+│   │   │   │   ├── 📁 detail/
+│   │   │   │   │   └── 📁 [id]/
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📁 hooks/
+│   │   │   │   │   ├── 📄 index.ts
+│   │   │   │   │   ├── 📄 useAdminComplaints.ts
+│   │   │   │   │   ├── 📄 useComplaintDetail.ts
+│   │   │   │   │   └── 📄 useNotifications.ts
+│   │   │   │   ├── 📁 types/
+│   │   │   │   │   └── 📄 index.ts
+│   │   │   │   ├── 📁 utils/
+│   │   │   │   │   ├── 📄 complaintService.ts
+│   │   │   │   │   ├── 📄 complaintTransform.ts
+│   │   │   │   │   ├── 📄 dateFormatDetail.ts
+│   │   │   │   │   ├── 📄 dateFormatter.ts
+│   │   │   │   │   ├── 📄 filterUtils.ts
+│   │   │   │   │   ├── 📄 index.ts
+│   │   │   │   │   └── 📄 statusConstants.ts
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 kategori/
+│   │   │   │   ├── 📁 create/
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📁 edit/
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 login/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 profile/
+│   │   │   │   ├── 📁 components/
+│   │   │   │   │   ├── 📄 MessageAlert.tsx
+│   │   │   │   │   ├── 📄 MfaSection.tsx
+│   │   │   │   │   ├── 📄 ProfileSection.tsx
+│   │   │   │   │   ├── 📄 SecuritySection.tsx
+│   │   │   │   │   └── 📄 index.ts
+│   │   │   │   ├── 📁 hooks/
+│   │   │   │   │   ├── 📄 index.ts
+│   │   │   │   │   ├── 📄 useMessage.ts
+│   │   │   │   │   ├── 📄 useMfa.ts
+│   │   │   │   │   └── 📄 useProfile.ts
+│   │   │   │   ├── 📁 types/
+│   │   │   │   │   └── 📄 index.ts
+│   │   │   │   ├── 📁 utils/
+│   │   │   │   │   ├── 📄 avatarUtils.ts
+│   │   │   │   │   ├── 📄 index.ts
+│   │   │   │   │   ├── 📄 mfaService.ts
+│   │   │   │   │   ├── 📄 passwordService.ts
+│   │   │   │   │   └── 📄 profileService.ts
+│   │   │   │   └── 📄 page.tsx
+│   │   │   └── 📄 page.tsx
+│   │   ├── 📁 components/
+│   │   │   ├── 📄 Header.tsx
+│   │   │   └── 📄 OneSignalInit.tsx
+│   │   ├── 📁 register/
+│   │   │   └── 📄 page.tsx
+│   │   ├── 📁 siswa/
+│   │   │   ├── 📁 chat/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 complaints/
+│   │   │   │   ├── 📁 create/
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📁 detail/
+│   │   │   │   │   └── 📁 [id]/
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   └── 📁 edit/
+│   │   │   │       └── 📁 [id]/
+│   │   │   │           └── 📄 page.tsx
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   ├── 📁 components/
+│   │   │   │   │   └── 📄 ComplaintsList.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 login/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   └── 📁 profile/
+│   │   │       ├── 📁 components/
+│   │   │       │   ├── 📄 MessageAlert.tsx
+│   │   │       │   ├── 📄 MfaSection.tsx
+│   │   │       │   ├── 📄 ProfileSection.tsx
+│   │   │       │   ├── 📄 SecuritySection.tsx
+│   │   │       │   └── 📄 index.ts
+│   │   │       ├── 📁 hooks/
+│   │   │       │   ├── 📄 index.ts
+│   │   │       │   ├── 📄 useMessage.ts
+│   │   │       │   ├── 📄 useMfa.ts
+│   │   │       │   └── 📄 useProfile.ts
+│   │   │       ├── 📁 types/
+│   │   │       │   └── 📄 index.ts
+│   │   │       ├── 📁 utils/
+│   │   │       │   ├── 📄 avatarUtils.ts
+│   │   │       │   ├── 📄 index.ts
+│   │   │       │   ├── 📄 mfaService.ts
+│   │   │       │   ├── 📄 passwordService.ts
+│   │   │       │   └── 📄 profileService.ts
+│   │   │       └── 📄 page.tsx
+│   │   ├── 📄 favicon.ico
+│   │   ├── 🎨 globals.css
+│   │   ├── 📄 layout.tsx
+│   │   └── 📄 page.tsx
+│   ├── 📁 lib/
+│   │   ├── 📁 utils/
+│   │   │   └── 📄 debounce.ts
+│   │   ├── 📄 categories.ts
+│   │   ├── 📄 complaintsQueries.ts
+│   │   ├── 📄 onesignal.ts
+│   │   ├── 📄 onesignalUserHelper.ts
+│   │   └── 📄 pocketbase.ts
+│   ├── 📁 public/
+│   │   ├── 📄 OneSignalSDKWorker.js
+│   │   ├── 🖼️ file.svg
+│   │   ├── 🖼️ globe.svg
+│   │   ├── 🖼️ next.svg
+│   │   ├── 🖼️ vercel.svg
+│   │   └── 🖼️ window.svg
+│   ├── ⚙️ .env.local.example
+│   ├── ⚙️ .gitignore
+│   ├── 📝 README.md
+│   ├── 📄 eslint.config.mjs
+│   ├── 📄 next-env.d.ts
+│   ├── 📄 next.config.ts
+│   ├── ⚙️ package-lock.json
+│   ├── ⚙️ package.json
+│   ├── 📄 postcss.config.mjs
+│   ├── ⚙️ screet.json
+│   ├── 📄 tailwind.config.cjs
+│   ├── ⚙️ tsconfig.json
+│   └── 📄 tsconfig.tsbuildinfo
+├── 📝 CHAT_NOTIFICATION_EXAMPLE.md
+├── 📝 COMPLAINT_NEW_NOTIFICATION_EXAMPLE.md
+├── 📝 COMPLAINT_STATUS_UPDATE_NOTIFICATION_EXAMPLE.md
+├── 📝 IMPLEMENTATION_ANALYSIS.md
+├── 📝 IMPLEMENTATION_GUIDE.md
+├── 📝 INTEGRATION_CHECKLIST.md
+├── 📝 ONESIGNAL_DEBUGGING_GUIDE.md
+├── 📝 ONESIGNAL_FIX_DOCUMENTATION.md
+├── 📝 ONESIGNAL_SETUP.md
+├── 📝 POCKETBASE_SCHEMA.md
+├── 📝 QUICK_START_SOP.md
+├── 📝 README.md
+├── 📝 README_IMPLEMENTATION.md
+├── 📝 SCHEMA_FIX_GUIDE.md
+├── 📝 SETUP_GUIDE.md
+├── ⚙️ STRUKTUR_FOLDER_LENGKAP.xml
+├── 📝 SUMMARY_AUDIT.md
+└── 📝 VERIFICATION_CHECKLIST.md
+
+────────────────────────────────────────────────────────────────────────────────
