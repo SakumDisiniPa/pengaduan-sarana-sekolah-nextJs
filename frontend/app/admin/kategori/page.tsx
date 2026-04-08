@@ -23,6 +23,21 @@ export default function AdminKategoriPage() {
   }, [router]);
 
   const handleDelete = async (cat: Category) => {
+    // 1. Check if category is used in active reports (status: diproses)
+    try {
+      const activeComplaints = await pb.collection("complaints").getList(1, 1, {
+        filter: `categories = "${cat.id}" && status = "diproses"`,
+        requestKey: null,
+      });
+
+      if (activeComplaints.totalItems > 0) {
+        alert(`Kategori "${cat.name}" tidak dapat dihapus karena sedang digunakan dalam ${activeComplaints.totalItems} laporan yang sedang DIPROSES.`);
+        return;
+      }
+    } catch (checkErr) {
+      console.warn("Gagal mengecek ketergantungan kategori:", checkErr);
+    }
+
     if (!window.confirm(`Yakin ingin menghapus kategori "${cat.name}"? Kategori yang sudah digunakan oleh laporan tidak akan terhapus dari laporan tersebut.`)) return;
 
     setDeleting(cat.id);

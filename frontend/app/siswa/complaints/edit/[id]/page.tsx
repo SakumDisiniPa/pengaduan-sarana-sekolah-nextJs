@@ -5,19 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
 import Link from "next/link";
 
-const categories = [
-  "AC Rusak",
-  "Lantai Retak",
-  "Atap Bocor",
-  "Pintu Rusak",
-  "Jendela Rusak",
-  "Meja Rusak",
-  "Kursi Rusak",
-  "Pencahayaan Rusak",
-  "Kamar Mandi Rusak",
-  "Taman Tidak Terawat",
-  "Lainnya"
-];
+import { useCategories } from "@/lib/categories";
 
 export default function UserComplaintEdit() {
   const params = useParams();
@@ -25,6 +13,7 @@ export default function UserComplaintEdit() {
   const id = params.id as string;
   const user = pb.authStore.model;
 
+  const { categories: categoryList, loading: categoriesLoading } = useCategories();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +21,7 @@ export default function UserComplaintEdit() {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [location, setLocation] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   
@@ -46,7 +35,10 @@ export default function UserComplaintEdit() {
 
     const fetchDetail = async () => {
       try {
-        const record = await pb.collection("complaints").getOne(id, { requestKey: null });
+        const record = await pb.collection("complaints").getOne(id, { 
+          expand: "categories",
+          requestKey: null 
+        });
         
         // Cek status
         if (record.status !== "menunggu") {
@@ -65,7 +57,7 @@ export default function UserComplaintEdit() {
         setTitle(record.title);
         setDesc(record.description);
         setLocation(record.location);
-        setCategory(record.category);
+        setCategories(record.categories || "");
         if (record.photo) {
           setPhotoPreview(pb.files.getURL(record, Array.isArray(record.photo) ? record.photo[0] : record.photo));
         }
@@ -119,7 +111,7 @@ export default function UserComplaintEdit() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !desc.trim() || !location.trim() || !category.trim()) return;
+    if (!title.trim() || !desc.trim() || !location.trim() || !categories.trim()) return;
 
     setSubmitting(true);
     try {
@@ -127,7 +119,7 @@ export default function UserComplaintEdit() {
       formData.append("title", title.trim());
       formData.append("description", desc.trim());
       formData.append("location", location.trim());
-      formData.append("category", category);
+      formData.append("categories", categories);
       if (photoFile) {
         formData.append("photo", photoFile);
       }
@@ -194,14 +186,14 @@ export default function UserComplaintEdit() {
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Kategori</label>
                 <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  value={categories}
+                  onChange={(e) => setCategories(e.target.value)}
                   required
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 >
-                  <option value="" disabled className="bg-slate-900">Pilih Kategori</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat} className="bg-slate-900">{cat}</option>
+                  <option value="" disabled className="bg-slate-900">{categoriesLoading ? "Memuat..." : "Pilih Kategori"}</option>
+                  {categoryList.map((cat) => (
+                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
                   ))}
                 </select>
               </div>

@@ -7,15 +7,20 @@ type Complaint = {
   description: string;
   status?: string;
   created: string;
-  creator?: string;
-  location?: string;
-  photo?: string;
-  expand?: {
-    creator?: {
-      email?: string;
-      name?: string;
+    category?: string;
+    categories?: string;
+    location?: string;
+    photo?: string;
+    expand?: {
+      creator?: {
+        email?: string;
+        name?: string;
+      };
+      categories?: {
+        id: string;
+        name: string;
+      };
     };
-  };
   rating?: number;
   feedback_message?: string;
   admin_reply?: string;
@@ -82,6 +87,11 @@ export default function ComplaintsList({ list, onDelete, formatDate }: Complaint
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <MapPin className="h-4 w-4" />
                   <span className="font-medium">{complaint.location}</span>
+                </div>
+              )}
+              {(complaint.expand?.categories?.name || complaint.categories) && (
+                <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                  <span className="font-semibold uppercase tracking-wider">{complaint.expand?.categories?.name || complaint.categories}</span>
                 </div>
               )}
             </div>

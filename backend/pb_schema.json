@@ -535,6 +535,19 @@
                 "type": "text"
             },
             {
+                "cascadeDelete": false,
+                "collectionId": "pbc_3292755704",
+                "hidden": false,
+                "id": "relation989021800",
+                "maxSelect": 1,
+                "minSelect": 0,
+                "name": "categories",
+                "presentable": false,
+                "required": true,
+                "system": false,
+                "type": "relation"
+            },
+            {
                 "hidden": false,
                 "id": "autodate2990389176",
                 "name": "created",

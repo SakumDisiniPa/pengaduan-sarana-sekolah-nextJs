@@ -39,7 +39,7 @@ function buildFilterString(filters: ComplaintFilters): string {
 
   // Category filter
   if (filters.category) {
-    filterParts.push(`category = "${filters.category}"`);
+    filterParts.push(`categories = "${filters.category}"`);
   }
 
   // Priority filter
@@ -102,7 +102,7 @@ export async function getComplaints(
     const result = await pb.collection('complaints').getList(page, perPage, {
       filter: filter || undefined,
       sort: sort,
-      expand: 'creator', // Expand creator details
+      expand: 'creator,categories', // Expand creator & categories details
       requestKey: null,
     });
 
@@ -119,7 +119,7 @@ export async function getComplaints(
 export async function getComplaintDetail(id: string) {
   try {
     const complaint = await pb.collection('complaints').getOne(id, {
-      expand: 'creator',
+      expand: 'creator,categories',
     });
     return complaint;
   } catch (error) {
@@ -151,8 +151,8 @@ export async function getComplaintsStats(filters: ComplaintFilters = {}) {
 
     // Group by category
     const byCategory = allComplaints.reduce((acc, c) => {
-      const cat = c.category || 'uncategorized';
-      acc[cat] = (acc[cat] || 0) + 1;
+      const catId = c.categories || 'uncategorized';
+      acc[catId] = (acc[catId] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -184,7 +184,7 @@ export async function getComplaintsForExport(filters: ComplaintFilters = {}) {
     const complaints = await pb.collection('complaints').getFullList({
       filter: filter || undefined,
       sort: '-created',
-      expand: 'creator',
+      expand: 'creator,categories',
     });
 
     return complaints;

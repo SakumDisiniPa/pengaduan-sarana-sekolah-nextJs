@@ -21,7 +21,7 @@ export const useComplaintDetail = (
     const fetchDetail = async () => {
       try {
         const record = await pb.collection("complaints").getOne(complaintId, {
-          expand: "creator",
+          expand: "creator,categories",
           requestKey: null,
         });
         const transformedData = transformComplaint(record);
