@@ -5,11 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { pb } from "../../../../../lib/pocketbase";
 import Link from "next/link";
 import { useComplaintDetail } from "../../hooks/useComplaintDetail";
+import { useCategories } from "@/lib/categories";
 import {
   COMPLAINT_STATUSES,
   getStatusConfig,
   formatDetailDate,
   updateComplaintStatus,
+  updateComplaintCategory,
   sendAdminReply,
 } from "../../utils";
 import { notifyComplaintStatusChange } from "../../hooks/useNotifications";
@@ -27,8 +29,9 @@ export default function AdminComplaintDetail() {
   const [adminReply, setAdminReply] = useState("");
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
-  // Fetch complaint detail
+  // Fetch regions/categories
   const { complaint, loading, error } = useComplaintDetail(id);
+  const { categories: categoryList } = useCategories();
 
   useEffect(() => {
     if (!user || !user.isAdmin) {
@@ -65,7 +68,7 @@ export default function AdminComplaintDetail() {
       try {
         const creatorId = typeof complaint.creator === "string" 
           ? complaint.creator 
-          : complaint.creator?.id;
+          : complaint.expand?.creator?.id;
 
         if (creatorId) {
           await notifyComplaintStatusChange(
@@ -186,7 +189,7 @@ export default function AdminComplaintDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                 <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Kategori</p>
-                <p className="font-semibold text-blue-300">{complaint.category || "-"}</p>
+                <p className="font-semibold text-blue-300">{complaint.expand?.categories?.name || "-"}</p>
               </div>
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                 <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Prioritas</p>

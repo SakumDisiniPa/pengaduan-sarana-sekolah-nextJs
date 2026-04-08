@@ -5,6 +5,7 @@ export { transformComplaint, transformComplaints } from "./complaintTransform";
 export {
   deleteComplaint,
   updateComplaintStatus,
+  updateComplaintCategory,
   sendAdminReply,
 } from "./complaintService";
 export { COMPLAINT_STATUSES, getStatusConfig } from "./statusConstants";

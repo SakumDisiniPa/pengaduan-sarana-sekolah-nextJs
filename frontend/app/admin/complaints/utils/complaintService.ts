@@ -44,3 +44,16 @@ export const sendAdminReply = async (
     throw err;
   }
 };
+
+export const updateComplaintCategory = async (
+  id: string,
+  categories: string
+): Promise<void> => {
+  try {
+    await pb.collection("complaints").update(id, { categories });
+  } catch (err: any) {
+    console.error("Error updating categories:", err);
+    alert("Gagal memperbarui kategori: " + err.message);
+    throw err;
+  }
+};

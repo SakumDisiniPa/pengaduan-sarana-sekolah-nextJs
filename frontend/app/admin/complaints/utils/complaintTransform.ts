@@ -7,7 +7,7 @@ export const transformComplaint = (raw: any): Complaint => {
     title: raw.title,
     description: raw.description,
     status: raw.status || "menunggu",
-    category: raw.category,
+    categories: raw.categories,
     priority: raw.priority,
     created: raw.created,
     deadline: raw.deadline,

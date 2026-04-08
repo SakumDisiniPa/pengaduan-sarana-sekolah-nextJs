@@ -16,7 +16,7 @@ export default function UserComplaintCreate() {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [location, setLocation] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
@@ -46,7 +46,7 @@ export default function UserComplaintCreate() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!title.trim() || !desc.trim() || !location.trim() || !category.trim()) return;
+    if (!title.trim() || !desc.trim() || !location.trim() || !categories.trim()) return;
 
     setSubmitting(true);
     setError(null);
@@ -56,7 +56,7 @@ export default function UserComplaintCreate() {
       formData.append("title", title.trim());
       formData.append("description", desc.trim());
       formData.append("location", location.trim());
-      formData.append("category", category);
+      formData.append("categories", categories);
       formData.append("creator", user.id);
       formData.append("status", "menunggu");
       if (photoFile) {
@@ -131,14 +131,14 @@ export default function UserComplaintCreate() {
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Kategori Masalah <span className="text-red-400">*</span></label>
                 <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  value={categories}
+                  onChange={(e) => setCategories(e.target.value)}
                   required
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 >
                   <option value="" disabled className="bg-slate-900">{categoriesLoading ? "Memuat..." : "Pilih Kategori"}</option>
                   {categoryList.map((cat) => (
-                    <option key={cat.id} value={cat.name} className="bg-slate-900">{cat.name}</option>
+                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
                   ))}
                 </select>
               </div>

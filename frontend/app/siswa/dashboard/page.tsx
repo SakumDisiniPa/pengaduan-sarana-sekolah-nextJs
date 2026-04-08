@@ -12,7 +12,7 @@ type Complaint = {
   title: string;
   description: string;
   status?: string;
-  category?: string;
+  categories?: string;
   priority?: string;
   created: string;
   location?: string;
@@ -266,8 +266,8 @@ export default function UserComplaintsDashboard() {
                             {formatDate(complaint.created)}
                           </span>
                           <span className="text-sm text-slate-300 mt-1 flex gap-2 items-center flex-wrap">
-                            <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-xs">
-                              Kategori: {complaint.category || '-'}
+                            <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-xs text-blue-300">
+                              Kategori: {complaint.expand?.categories?.name || complaint.categories || '-'}
                             </span>
                             <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-xs">
                               Lokasi: {complaint.location || '-'}

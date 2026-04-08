@@ -94,7 +94,7 @@ export default function FilterControls({
           >
             <option value="">Semua Kategori</option>
             {categoryList.map((cat) => (
-              <option key={cat.id} value={cat.name}>
+              <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}

@@ -11,10 +11,15 @@ type Complaint = {
   title: string;
   description: string;
   status: string;
-  category: string;
+  categories: string;
   priority: string;
   created: string;
   location: string;
+  expand?: {
+    categories?: {
+      name: string;
+    };
+  };
   photo?: string;
   rating?: number;
   feedback_message?: string;
@@ -51,13 +56,17 @@ export default function UserComplaintDetail() {
 
     const fetchDetail = async () => {
       try {
-        const record = await pb.collection("complaints").getOne(id, { requestKey: null });
+        const record = await pb.collection("complaints").getOne(id, { 
+          expand: "categories",
+          requestKey: null 
+        });
         const data: Complaint = {
           id: record.id,
           title: record.title,
           description: record.description,
           status: record.status || "menunggu",
-          category: record.category,
+          categories: record.categories,
+          expand: record.expand,
           priority: record.priority,
           created: record.created,
           location: record.location,
@@ -93,7 +102,7 @@ export default function UserComplaintDetail() {
             title: e.record.title,
             description: e.record.description,
             status: e.record.status || "menunggu",
-            category: e.record.category,
+            categories: e.record.categories,
             priority: e.record.priority,
             location: e.record.location,
             rating: e.record.rating,
@@ -216,7 +225,7 @@ export default function UserComplaintDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                 <p className="text-slate-400 text-xs uppercase mb-1">Kategori</p>
-                <p className="font-semibold text-purple-300">{complaint.category || "-"}</p>
+                <p className="font-semibold text-purple-300">{complaint.expand?.categories?.name || complaint.categories || "-"}</p>
               </div>
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                 <p className="text-slate-400 text-xs uppercase mb-1">Prioritas</p>

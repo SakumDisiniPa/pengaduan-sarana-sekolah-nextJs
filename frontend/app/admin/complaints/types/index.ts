@@ -8,13 +8,15 @@ export type Complaint = {
   created: string;
   deadline?: string;
   feedback?: string;
-  creator?: string;
+  creator?: string | User;
   location?: string;
   photo?: string;
+  categories?: string;
   expand?: {
-    creator?: {
-      email?: string;
-      name?: string;
+    creator?: User;
+    categories?: {
+      id: string;
+      name: string;
     };
   };
   rating?: number;
