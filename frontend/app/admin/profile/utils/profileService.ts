@@ -39,11 +39,12 @@ export const updateProfile = async (
       avatar: updatedUser.avatar,
       mfaEnabled: updatedUser.mfaEnabled,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Log error untuk mempermudah debugging di console browser
     console.error("Error updating profile:", err);
     
     // Lempar pesan error yang user-friendly
-    throw new Error(err.message || "Gagal memperbarui profil. Silakan coba lagi.");
+    const message = err instanceof Error ? err.message : "Gagal memperbarui profil. Silakan coba lagi.";
+    throw new Error(message);
   }
 };

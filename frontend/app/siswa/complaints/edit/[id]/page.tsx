@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
 import Link from "next/link";
+import Image from "next/image";
 
 import { useCategories } from "@/lib/categories";
 
@@ -63,8 +64,8 @@ export default function UserComplaintEdit() {
         }
 
         isFetched.current = true;
-      } catch (err: any) {
-        if (!err.isAbort) {
+      } catch (err: unknown) {
+        if (!(err as { isAbort?: boolean }).isAbort) {
           setError("Gagal memuat detail pengaduan. Halaman mungkin tidak ditemukan.");
         }
       } finally {
@@ -126,8 +127,9 @@ export default function UserComplaintEdit() {
 
       await pb.collection("complaints").update(id, formData);
       router.push(`/siswa/complaints/detail/${id}`);
-    } catch (err: any) {
-      alert("Gagal menyimpan perubahan: " + err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Gagal menyimpan perubahan";
+      alert(message);
       setSubmitting(false);
     }
   };
@@ -232,10 +234,12 @@ export default function UserComplaintEdit() {
                 />
                 {photoPreview && (
                   <div className="mt-4 rounded-xl overflow-hidden border border-white/10 aspect-video relative bg-black/40">
-                    <img
+                    <Image
                       src={photoPreview}
                       alt="Preview"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   </div>
                 )}

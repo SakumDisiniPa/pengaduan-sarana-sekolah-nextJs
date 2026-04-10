@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 import { getInitialLetter } from "../utils";
 import { User, Pencil, X } from "lucide-react";
 
@@ -38,9 +39,11 @@ export function ProfileSection({
             onClick={() => setIsModalOpen(true)}
           >
             {avatarPreview ? (
-              <img
+              <Image
                 src={avatarPreview}
                 alt="Profile"
+                width={96}
+                height={96}
                 className="w-24 h-24 rounded-full border-2 border-purple-500/50 shadow-lg object-cover group-hover:opacity-75 transition-opacity"
               />
             ) : (
@@ -84,9 +87,11 @@ export function ProfileSection({
 
             <div className="relative w-full max-w-sm aspect-[3/4] bg-slate-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
               {avatarPreview ? (
-                <img
+                <Image
                   src={avatarPreview}
                   alt="Full Preview"
+                  width={384}
+                  height={512}
                   className="w-full h-full object-cover"
                 />
               ) : (

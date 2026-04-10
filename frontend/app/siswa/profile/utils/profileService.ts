@@ -27,16 +27,15 @@ export const updateProfile = async (
       avatar: updatedUser.avatar,
       mfaEnabled: updatedUser.mfaEnabled,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error updating profile:", err);
-    throw new Error(err.message || "Gagal memperbarui profil");
+    throw new Error((err as Error).message || "Gagal memperbarui profil");
   }
 };
 
-export const getAvatarUrl = (user: ProfileUser): string | null => {
-  if (!user.avatar) return null;
-  return pb.files.getURL(
-    { id: user.id, collectionId: user.collectionId, collectionName: user.collectionName } as any,
-    user.avatar
-  );
+export const getAvatarUrl = (user: { id: string; collectionId: string; collectionName: string; avatar?: string; photo?: string } | null): string | null => {
+  if (!user || (!user.avatar && !user.photo)) return null;
+  const fileName = user.avatar || user.photo;
+  if (!fileName) return null;
+  return pb.files.getURL(user as unknown as { [key: string]: unknown; id: string; collectionId: string; collectionName: string }, fileName);
 };

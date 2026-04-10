@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
 import { useCategories } from "@/lib/categories";
-import { notifyAdminsOfNewComplaint, Complaint } from "@/app/admin/complaints/hooks/useNotifications";
+import { notifyAdminsOfNewComplaint } from "@/app/admin/complaints/hooks/useNotifications";
+import type { Complaint, User } from "@/app/admin/complaints/types";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function UserComplaintCreate() {
   const router = useRouter();
@@ -24,7 +26,7 @@ export default function UserComplaintCreate() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsClient(true);
+    setTimeout(() => setIsClient(true), 0);
     if (!user) {
       router.push("/siswa/login");
     }
@@ -74,17 +76,18 @@ export default function UserComplaintCreate() {
         });
         
         if (admins.length > 0) {
-          await notifyAdminsOfNewComplaint(newComplaint, user as any, admins as any);
+          await notifyAdminsOfNewComplaint(newComplaint as unknown as Complaint, user as unknown as User, admins as unknown as User[]);
           console.log(`Notifikasi terkirim ke ${admins.length} admin`);
         }
-      } catch (notifErr) {
+      } catch (notifErr: unknown) {
         // Don't block redirect if notification fails
         console.warn("Notifikasi error (non-blocking):", notifErr);
       }
 
       router.push("/siswa/dashboard?success=true");
-    } catch (err: any) {
-      setError("Gagal membuat laporan: " + err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Gagal membuat laporan";
+      setError(message);
       setSubmitting(false);
     }
   };
@@ -179,10 +182,12 @@ export default function UserComplaintCreate() {
                 />
                 {photoPreview && (
                   <div className="mt-4 rounded-xl overflow-hidden border border-white/10 aspect-video relative bg-black/40">
-                    <img
+                    <Image
                       src={photoPreview}
                       alt="Preview"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   </div>
                 )}

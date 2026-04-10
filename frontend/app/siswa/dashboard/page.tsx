@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
 import Link from "next/link";
+import { PlusCircle, Eye, Edit2, Trash2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { getComplaints, ComplaintFilters } from "@/lib/complaintsQueries";
 
 // Types
@@ -20,7 +21,12 @@ type Complaint = {
   rating?: number;
   feedback_message?: string;
   admin_reply?: string;
-  expand?: any;
+  expand?: {
+    categories?: {
+      name: string;
+    };
+    [key: string]: unknown;
+  };
 };
 
 const statuses = [
@@ -38,6 +44,17 @@ const statusStyles: Record<string, string> = {
 
 export default function UserComplaintsDashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // URL success cleanup
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      alert("✅ Laporan berhasil dibuat!");
+      router.replace(pathname);
+    }
+  }, [searchParams, pathname, router]);
+
   const user = pb.authStore.model;
   const [isClient, setIsClient] = useState(false);
 
@@ -52,11 +69,21 @@ export default function UserComplaintsDashboard() {
   const [initialLoading, setInitialLoading] = useState(true);
   
   // Pagination States
-  const [page, setPage] = useState(1);
+  const urlPage = Number(searchParams.get("page")) || 1;
+  const [page, setPage] = useState(urlPage);
   const [perPage, setPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
 
-  const isFetched = useRef(false);
+  // Sync state with URL
+  useEffect(() => {
+    setPage(urlPage);
+  }, [urlPage]);
+
+  const updatePage = useCallback((newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  }, [router, pathname, searchParams]);
 
   // Debounce search input
   useEffect(() => {
@@ -77,10 +104,42 @@ export default function UserComplaintsDashboard() {
 
   // Reset page ke 1 jika filter atau perPage berubah
   useEffect(() => {
-    setPage(1);
-  }, [effectiveFilters, perPage]);
+    if (page !== 1) updatePage(1);
+  }, [effectiveFilters, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch Complaints List
+  const fetchList = useCallback(async (isMounted = true) => {
+    try {
+      setLoading(true);
+
+      const result = await getComplaints(effectiveFilters, {
+        page: page,
+        perPage: perPage,
+        sort: "-created",
+      });
+
+      if (!isMounted) return;
+
+      setList(
+        (result.items as unknown[] as Complaint[]).map((r) => ({
+          ...r,
+          status: r.status || "menunggu",
+          photo: r.photo ? pb.files.getURL(r, Array.isArray(r.photo) ? r.photo[0] : r.photo) : undefined,
+        }))
+      );
+      
+      setTotalPages(result.totalPages);
+      setLoading(false);
+      setInitialLoading(false);
+    } catch (err: unknown) {
+      if (isMounted && (err as { isAbort?: boolean })?.isAbort !== true) {
+        console.error("Load error:", err);
+        setLoading(false);
+        setInitialLoading(false);
+      }
+    }
+  }, [effectiveFilters, page, perPage]);
+
   useEffect(() => {
     setIsClient(true);
     if (!user) {
@@ -88,49 +147,18 @@ export default function UserComplaintsDashboard() {
       return;
     }
 
-    let mounted = true;
+    fetchList();
 
-    const init = async () => {
-      try {
-        setLoading(true);
-
-        const result = await getComplaints(effectiveFilters, {
-          page: page,
-          perPage: perPage,
-          sort: "-created",
-        });
-
-        if (!mounted) return;
-
-        setList(
-          (result.items as any[]).map((r) => ({
-            ...r,
-            status: r.status || "menunggu",
-            photo: r.photo ? pb.files.getURL(r, Array.isArray(r.photo) ? r.photo[0] : r.photo) : undefined,
-          }))
-        );
-        
-        setTotalPages(result.totalPages);
-
-        setLoading(false);
-        setInitialLoading(false);
-      } catch (err: any) {
-        if (mounted && err?.isAbort !== true) {
-          console.error("Load error:", err);
-          if (initialLoading) {
-            setLoading(false);
-            setInitialLoading(false);
-          }
-        }
-      }
-    };
-
-    init();
+    // Subscribe to ALL complaints to handle realtime updates/deletes/creations
+    pb.collection("complaints").subscribe("*", () => {
+      // Refresh list on ANY change to ensure pagination integrity
+      fetchList();
+    });
 
     return () => {
-      mounted = false;
+      pb.collection("complaints").unsubscribe("*");
     };
-  }, [user?.id, router, effectiveFilters, page, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, router, fetchList]);
 
   const deleteComplaint = async (id: string) => {
     if (!window.confirm("Apakah anda yakin ingin menghapus laporan ini?")) return;
@@ -212,7 +240,7 @@ export default function UserComplaintsDashboard() {
             href="/siswa/complaints/create"
             className="w-full lg:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg border border-blue-500/50 hover:shadow-blue-500/20 font-bold transition flex items-center justify-center gap-2"
           >
-            <span>⊕</span> Buat Pengaduan
+            <PlusCircle className="w-5 h-5" /> Buat Pengaduan
           </Link>
         </div>
 
@@ -232,7 +260,7 @@ export default function UserComplaintsDashboard() {
              </div>
           ) : list.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="text-6xl mb-4 opacity-50">📂</div>
+              <FileText className="w-16 h-16 mx-auto mb-4 opacity-20 text-slate-400" />
               <h3 className="text-xl font-bold text-white mb-2">Riwayat Kosong</h3>
               <p className="text-slate-400 mb-6">Kamu belum memiliki pengaduan dengan filter tersebut.</p>
               <Link href="/siswa/complaints/create" className="text-blue-400 hover:text-blue-300 font-medium underline">
@@ -253,8 +281,8 @@ export default function UserComplaintsDashboard() {
                 <tbody className="divide-y divide-white/5">
                   {list.map((complaint, index) => (
                     <tr key={complaint.id} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="py-5 px-6 font-medium text-slate-500 group-hover:text-slate-300 transition-colors">
-                        {index + 1}
+                      <td className="py-5 px-6 font-medium text-slate-500 group-hover:text-slate-300 transition-colors text-center">
+                        {(page - 1) * perPage + index + 1}
                       </td>
                       
                       <td className="py-5 px-6">
@@ -291,26 +319,28 @@ export default function UserComplaintsDashboard() {
                         <div className="flex items-center justify-center gap-2">
                           <Link
                             href={`/siswa/complaints/detail/${complaint.id}`}
-                            className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 px-4 py-2 rounded-lg text-sm font-semibold transition"
+                            className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 p-2 rounded-lg transition-all group/btn shadow-inner"
+                            title="Lihat Detail"
                           >
-                            <span className="mr-1">👁</span> Lihat
+                            <Eye className="w-5 h-5" />
                           </Link>
                           
                           {complaint.status === "menunggu" && (
                             <Link
                               href={`/siswa/complaints/edit/${complaint.id}`}
-                              className="bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/20 text-slate-300 px-4 py-2 rounded-lg text-sm font-semibold transition"
+                              className="bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/20 text-slate-300 p-2 rounded-lg transition-all shadow-inner"
+                              title="Edit Laporan"
                             >
-                              Edit
+                              <Edit2 className="w-5 h-5" />
                             </Link>
                           )}
 
                           <button
                             onClick={() => deleteComplaint(complaint.id)}
-                            className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 p-2 rounded-lg transition"
+                            className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 p-2 rounded-lg transition-all shadow-inner"
                             title="Hapus Laporan"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
@@ -342,21 +372,27 @@ export default function UserComplaintsDashboard() {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => updatePage(Math.max(1, page - 1))}
                 disabled={page === 1 || loading}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition disabled:opacity-20 disabled:cursor-not-allowed border border-white/10"
+                title="Halaman Sebelumnya"
               >
-                ← Prev
+                <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="text-sm font-semibold text-slate-300 min-w-[5rem] text-center">
-                Hal {page} / {totalPages || 1}
-              </span>
+              
+              <div className="flex items-center px-4 py-2 bg-white/5 border border-white/10 rounded-xl min-w-[7rem] justify-center">
+                <span className="text-sm font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Hal {page} / {totalPages || 1}
+                </span>
+              </div>
+
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => updatePage(Math.min(totalPages, page + 1))}
                 disabled={page >= totalPages || loading}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition disabled:opacity-20 disabled:cursor-not-allowed border border-white/10"
+                title="Halaman Berikutnya"
               >
-                Next →
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>

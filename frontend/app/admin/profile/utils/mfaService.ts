@@ -14,7 +14,7 @@ export const initiateMfaSetup = async (email: string): Promise<MfaSetupResult> =
   try {
     const { secret, qrCodeUrl } = await generateMfaSetup(email);
     return { secret, qrCodeUrl };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error initiating MFA setup:", err);
     throw new Error("Gagal menginisialisasi MFA");
   }
@@ -26,7 +26,7 @@ export const verifyMfaToken = async (
 ): Promise<boolean> => {
   try {
     return await verifyMfaCode(secret, token);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error verifying MFA code:", err);
     throw new Error("Gagal memverifikasi kode MFA");
   }
@@ -42,9 +42,10 @@ export const enableMfa = async (
     if (!res.success) {
       throw new Error(res.error || "Gagal menyimpan MFA ke database");
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error enabling MFA:", err);
-    throw new Error(err.message || "Gagal mengaktifkan MFA");
+    const message = err instanceof Error ? err.message : "Gagal mengaktifkan MFA";
+    throw new Error(message);
   }
 };
 
@@ -54,8 +55,9 @@ export const disableMfaInDb = async (userId: string): Promise<void> => {
       mfaEnabled: false,
       mfaSecret: "",
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error disabling MFA:", err);
-    throw new Error(err.message || "Gagal menonaktifkan MFA");
+    const message = err instanceof Error ? err.message : "Gagal menonaktifkan MFA";
+    throw new Error(message);
   }
 };

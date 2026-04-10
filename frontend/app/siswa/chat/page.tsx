@@ -1,363 +1,177 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
 import { notifyAdminsOfNewChat } from "@/app/admin/chats/hooks/useNotifications";
+import {
+  ChatSidebar,
+  ChatHeader,
+  MessagesList,
+  ChatInput,
+} from "@/app/admin/chats/components";
+import type { User as ChatUser } from "@/app/admin/chats/types";
+import { 
+  getUniqueUsers, 
+  filterMessagesByUser, 
+  groupMessagesByDate 
+} from "@/app/admin/chats/utils/messageHelpers";
+import useSiswaChatSync from "@/hooks/useSiswaChatSync";
+import { useSiswaChats } from "./hooks/useSiswaChats";
 
-
-type User = {
-  id: string;
-  email: string;
-  isAdmin?: boolean;
-};
-
-type ChatRecord = {
-  id: string;
-  text: string;
-  created: string;
-  sender?: User;
-  recipient?: User;
-};
+type User = ChatUser;
 
 export default function ChatPage() {
   const router = useRouter();
   const user = pb.authStore.model as User | null;
-  const [messages, setMessages] = useState<ChatRecord[]>([]);
+  
+  // 1. Sync & State Management via Dexie
+  const { isReady } = useSiswaChatSync();
+  const { messages, loading: chatLoading } = useSiswaChats(isReady);
+  
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
   const [admins, setAdmins] = useState<User[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
   useEffect(() => {
     if (!user) {
       router.push("/siswa/login");
-      return;
     }
+  }, [user, router]);
 
-    let mounted = true;
-    let unsubscribe: (() => void) | null = null;
-
+  // Fetch Admin list for Contact List (This stays realtime from PB for metadata)
+  useEffect(() => {
+    if (!user) return;
     const fetchAdmins = async () => {
       try {
         const adminList = await pb.collection("users").getFullList({
           filter: "isAdmin = true",
         });
-        if (mounted) setAdmins(adminList as any);
+        setAdmins(adminList as unknown as User[]);
       } catch (err) {
-        console.error("Failed to fetch admins for notifications:", err);
+        console.error("Failed to fetch admins:", err);
       }
     };
-
-
-    const init = async () => {
-      const makeFilter = () => {
-        if (user?.isAdmin) {
-          return "";
-        }
-        return `sender="${user.id}" || recipient="${user.id}"`;
-      };
-
-      try {
-        const list = await pb.collection("chats")
-          .getFullList({
-            sort: "-created",
-            filter: makeFilter(),
-            expand: "sender,recipient",
-          });
-        
-        if (!mounted) return;
-        
-        setMessages(
-          list.map((r) => ({
-            id: r.id,
-            text: r.text,
-            created: r.created,
-            sender: r.expand?.sender,
-            recipient: r.expand?.recipient,
-          }))
-        );
-        setLoading(false);
-        setTimeout(scrollToBottom, 100);
-      } catch (err) {
-        const error = err as { isAbort?: boolean };
-        if (mounted && error?.isAbort !== true) {
-          setLoading(false);
-        }
-      }
-
-      // Subscribe to realtime updates
-      try {
-        unsubscribe = await pb.collection("chats")
-          .subscribe("*", (e) => {
-            if (!mounted) return;
-            
-            if (e.action === "create") {
-              const rec = e.record;
-              if (user.isAdmin || rec.sender === user.id || rec.recipient === user.id) {
-                pb.collection("chats")
-                  .getOne(rec.id, { expand: "sender,recipient" })
-                  .then((fullRec) => {
-                    if (!mounted) return;
-                    setMessages((prev) => [
-                      ...prev,
-                      {
-                        id: fullRec.id,
-                        text: fullRec.text,
-                        created: fullRec.created,
-                        sender: fullRec.expand?.sender,
-                        recipient: fullRec.expand?.recipient,
-                      },
-                    ]);
-                    setTimeout(scrollToBottom, 100);
-                  })
-                  .catch(console.error);
-              }
-            }
-          });
-      } catch (err) {
-        const error = err as { isAbort?: boolean };
-        if (error?.isAbort !== true) {
-          console.error("Subscribe error:", err);
-        }
-      }
-    };
-
     fetchAdmins();
-    init();
+  }, [user]);
 
+  // Merge Admins from history + Available Admins
+  const allContacts = useMemo(() => {
+    const historicalAdmins = getUniqueUsers(messages, { forAdmin: false });
+    const adminMap = new Map<string, User>();
+    
+    // 1. Add available admins first
+    admins.forEach(a => adminMap.set(a.id, a));
+    
+    // 2. Add historical admins (might have more details if sync'd)
+    historicalAdmins.forEach(a => adminMap.set(a.id, a));
+    
+    // Return sorted by recent activity if possible
+    return Array.from(adminMap.values()).sort((a, b) => {
+        const aMsg = messages.filter(m => m.sender === a.id || m.recipient === a.id).pop();
+        const bMsg = messages.filter(m => m.sender === b.id || m.recipient === b.id).pop();
+        if (!aMsg) return 1;
+        if (!bMsg) return -1;
+        return new Date(bMsg.created).getTime() - new Date(aMsg.created).getTime();
+    });
+  }, [messages, admins]);
 
-    return () => {
-      mounted = false;
-      if (unsubscribe) unsubscribe();
-    };
-  }, [user?.id, router]);
+  // Filter messages for selected admin
+  const filteredMessages = useMemo(
+    () => filterMessagesByUser(messages, selectedAdmin),
+    [messages, selectedAdmin]
+  );
+
+  const groupedMessages = useMemo(() => {
+    return groupMessagesByDate(filteredMessages);
+  }, [filteredMessages]);
+
+  // Auto-scroll logic
+  useEffect(() => {
+    if (filteredMessages.length > 0) {
+      setTimeout(() => scrollToBottom("auto"), 100);
+    }
+  }, [filteredMessages.length, selectedAdmin]);
 
   const send = async () => {
-    if (!text.trim() || !user) return;
+    if (!text.trim() || !user || !selectedAdmin) return;
     try {
       const data = {
         text: text.trim(),
         sender: user.id,
+        recipient: selectedAdmin.id, // Explicitly target the selected admin
       };
-      const newMessage = await pb.collection("chats").create(data);
+      await pb.collection("chats").create(data);
       
-      // Kirim notifikasi ke semua admin
-      if (admins.length > 0) {
-        try {
-          await notifyAdminsOfNewChat(user, text.trim(), admins);
-          console.log("Admins notified of new chat from student");
-        } catch (notificationError) {
-          console.warn("Notification error (non-blocking):", notificationError);
-        }
-      }
+      // Notify the specific admin
+      await notifyAdminsOfNewChat(user, text.trim(), [selectedAdmin]).catch(console.warn);
       
       setText("");
     } catch (err) {
       console.error(err);
     }
-
   };
 
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return "Hari ini";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Kemarin";
-    } else {
-      return date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    }
-  };
-
-  const groupedMessages: { [date: string]: ChatRecord[] } = {};
-  messages.forEach((msg) => {
-    const dateKey = new Date(msg.created).toDateString();
-    if (!groupedMessages[dateKey]) groupedMessages[dateKey] = [];
-    groupedMessages[dateKey].push(msg);
-  });
-
-  const sortedDates = Object.keys(groupedMessages).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
-
-  if (loading) {
+  if (chatLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-[#f0f2f5] dark:bg-zinc-950">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900 dark:to-black">
-      {/* Elemen dekoratif latar */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-purple-300 opacity-20 blur-3xl filter dark:bg-purple-800/20" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300 opacity-20 blur-3xl filter dark:bg-blue-800/20" />
-      </div>
+    <div className="flex flex-col h-screen bg-[#f0f2f5] dark:bg-zinc-950 overflow-hidden relative">
+      {/* Container Utama: Full Screen Style ala Admin */}
+      <div className="flex-1 flex overflow-hidden shadow-2xl">
+        
+        {/* Sidebar: Daftar Admin */}
+        <ChatSidebar 
+          users={allContacts}
+          messages={messages}
+          selectedUser={selectedAdmin}
+          onSelectUser={setSelectedAdmin}
+          placeholder="Cari admin sekolah..."
+        />
 
-      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl bg-white/70 backdrop-blur-md shadow-xl ring-1 ring-white/20 dark:bg-zinc-900/70">
-          {/* Header chat */}
-          <div className="border-b border-white/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10 px-6 py-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Chat dengan Admin
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Tanyakan seputar pengaduan atau sarana sekolah
-            </p>
-          </div>
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col bg-[#efeae2] dark:bg-zinc-900 relative">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.02] pointer-events-none bg-[url('https://wallpaperaccess.com/full/1288076.jpg')] bg-repeat" />
 
-          {/* Area pesan */}
-          <div className="h-[calc(100vh-300px)] min-h-[400px] overflow-y-auto p-6">
-            {messages.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400">
-                <svg
-                  className="mb-4 h-12 w-12"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-                <p>Belum ada pesan. Mulai percakapan dengan admin!</p>
+          {selectedAdmin ? (
+            <div className="flex flex-col h-full relative z-10">
+              <ChatHeader selectedUser={selectedAdmin} />
+              
+              <div className="flex-1 flex flex-col overflow-hidden relative">
+                <MessagesList 
+                  groupedMessages={groupedMessages} 
+                  messagesEndRef={messagesEndRef}
+                />
               </div>
-            ) : (
-              <div className="flex flex-col space-y-4">
-                {sortedDates.map((dateKey) => (
-                  <div key={dateKey}>
-                    <div className="sticky top-0 z-10 my-4 flex justify-center">
-                      <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-600 backdrop-blur-sm dark:bg-zinc-800/80 dark:text-gray-300">
-                        {formatDate(dateKey)}
-                      </span>
-                    </div>
-                    {groupedMessages[dateKey].map((msg, index) => {
-                      const isOwn = msg.sender?.id === user?.id;
-                      const isAdmin = msg.sender?.isAdmin;
-                      const showAvatar =
-                        !isOwn &&
-                        (index === 0 ||
-                          groupedMessages[dateKey][index - 1]?.sender?.id !==
-                            msg.sender?.id);
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`mb-3 flex ${
-                            isOwn ? "justify-end" : "justify-start"
-                          } animate-fade-in-up-sm`}
-                          style={{
-                            animationDelay: `${index * 50}ms`,
-                            animationFillMode: "both",
-                          }}
-                        >
-                          {!isOwn && showAvatar && (
-                            <div className="mr-2 flex-shrink-0 self-end">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-sm font-semibold text-white shadow-md">
-                                {msg.sender?.email?.charAt(0).toUpperCase() ||
-                                  "A"}
-                              </div>
-                            </div>
-                          )}
-                          <div
-                            className={`max-w-[75%] ${isOwn ? "order-2" : ""}`}
-                          >
-                            <div
-                              className={`rounded-2xl px-4 py-2 shadow-sm ${
-                                isOwn
-                                  ? "rounded-br-none bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                                  : isAdmin
-                                  ? "rounded-bl-none bg-gray-200 text-gray-900 dark:bg-zinc-700 dark:text-white"
-                                  : "rounded-bl-none bg-gray-100 text-gray-900 dark:bg-zinc-800 dark:text-white"
-                              }`}
-                            >
-                              <p className="whitespace-pre-wrap break-words text-sm">
-                                {msg.text}
-                              </p>
-                            </div>
-                            <div
-                              className={`mt-1 flex text-xs text-gray-500 dark:text-gray-400 ${
-                                isOwn ? "justify-end" : "justify-start"
-                              }`}
-                            >
-                              <span>{formatTime(msg.created)}</span>
-                              {isOwn && <span className="ml-1">✓</span>}
-                            </div>
-                          </div>
-                          {!isOwn && !showAvatar && (
-                            <div className="mr-2 w-8 flex-shrink-0" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </div>
 
-          {/* Input area */}
-          <div className="border-t border-white/20 bg-white/50 p-4 backdrop-blur-sm dark:bg-zinc-900/50">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    send();
-                  }
-                }}
-                placeholder="Tulis pesan..."
-                className="flex-1 rounded-full border border-gray-300 bg-white/70 px-5 py-3 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-zinc-600 dark:bg-zinc-800/70 dark:text-white"
+              <ChatInput 
+                text={text}
+                onTextChange={setText}
+                onSend={send}
+                sending={false}
+                placeholder={`Tulis pesan ke ${selectedAdmin.name || "Admin"}...`}
               />
-              <button
-                onClick={send}
-                disabled={!text.trim()}
-                className="group relative flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="absolute inset-0 -translate-x-full skew-x-12 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              </button>
             </div>
-          </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center p-8 space-y-4">
+               <div className="w-24 h-24 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-4">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+              </div>
+              <h2 className="text-2xl font-bold dark:text-white">Pilih Admin untuk Mengobrol</h2>
+              <p className="text-zinc-500 dark:text-zinc-400 max-w-sm">Daftar admin sekolah ada di sebelah kiri. Ketuk salah satu untuk memulai percakapan baru.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

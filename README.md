@@ -3,13 +3,17 @@
 Aplikasi web modern untuk melaporkan dan mengelola pengaduan sarana sekolah dengan fitur chat real-time, kategori dinamis, sistem prioritas, dan dashboard analytics yang komprehensif.
 
 ![Status](https://img.shields.io/badge/Status-Development-blue)
+![Version](https://img.shields.io/badge/Version-3.0.0-emerald)
 ![Frontend](https://img.shields.io/badge/Frontend-Next.js%2016-blue)
 ![Backend](https://img.shields.io/badge/Backend-Go%2B%20PocketBase-teal)
 ![Icons](https://img.shields.io/badge/Icons-Lucide%20React-green)
 
+> [!TIP]
+> **🚀 Lihat apa yang baru di v3.0.0!** Cek log pembaruan sistem kami di **[updates.md](./updates.md)** untuk melihat perombakan sistem chat terbaru, optimasi database, dan peningkatan stabilitas.
+
 ---
 
-## 🎯 Fitur Unggulan (Update v2.3.0)
+## 🎯 Fitur Unggulan (Update v3.0.0)
 
 ### User (Pengguna Biasa):
 - ✅ **Register & Login** – Autentikasi email/password dengan MFA optional

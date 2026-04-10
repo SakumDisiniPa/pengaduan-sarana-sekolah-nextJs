@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { pb } from "@/lib/pocketbase";
-import {
-  getComplaints,
-  ComplaintFilters,
-} from "@/lib/complaintsQueries";
+import { useEffect, useState, useCallback } from "react";
+import { db } from "@/lib/db";
+import { decryptData } from "@/lib/crypto";
+import { ComplaintFilters } from "@/lib/complaintsQueries";
 import { Complaint, User } from "../types";
 import { transformComplaints } from "../utils/complaintTransform";
+import { pb } from "@/lib/pocketbase";
 
 interface UseAdminComplaintsOptions {
   page: number;
   filters: ComplaintFilters;
-  enabled?: boolean;
+  isReady: boolean; // From Sync Engine
+  perPage?: number;
 }
 
 interface UseAdminComplaintsResult {
@@ -19,13 +19,12 @@ interface UseAdminComplaintsResult {
   initialLoading: boolean;
   totalPages: number;
   users: User[];
-  loadUsers: () => Promise<void>;
 }
 
 export const useAdminComplaints = (
   options: UseAdminComplaintsOptions
 ): UseAdminComplaintsResult => {
-  const { page, filters, enabled = true } = options;
+  const { page, filters, isReady, perPage = 20 } = options;
 
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -33,95 +32,77 @@ export const useAdminComplaints = (
   const [initialLoading, setInitialLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadUsers = async () => {
+  const admin = pb.authStore.model;
+
+  const loadLocalData = useCallback(async (isSilent = false) => {
+    if (!isReady || !admin?.id) return;
+
     try {
-      const userList = await pb.collection("users").getFullList({
-        requestKey: null
-    });
-      setUsers(
-        userList.map((u) => ({
-          id: u.id,
-          email: u.email || "",
-          name: u.name,
-        }))
-      );
-    } catch (err) {
-      console.error("Error loading users:", err);
-    }
-  };
+      if (!isSilent) setLoading(true);
 
-  // Load users on mount
-  useEffect(() => {
-    loadUsers();
-  }, []);
+      // 1. Load Users
+      const rawUsers = await db.users.toArray();
+      const decryptedUsers = rawUsers
+        .map(u => decryptData(u.data, admin.id))
+        .filter(u => u);
+      
+      setUsers(decryptedUsers.map(u => ({
+        id: u.id,
+        email: u.email || "",
+        name: u.name,
+      })));
 
-  // Load complaints with realtime subscription
-  useEffect(() => {
-    if (!enabled) return;
+      // 2. Load and Filter Complaints
+      const rawComplaints = await db.complaints.toArray();
+      const decryptedComplaints = rawComplaints
+        .map(c => decryptData(c.data, admin.id))
+        .filter(c => c);
 
-    let mounted = true;
-    let unsubscribe: (() => void) | null = null;
+      // Manual Filtration
+      let filtered = decryptedComplaints;
 
-    const init = async () => {
-      try {
-        setLoading(true);
-
-        // Fetch dengan pagination
-        const result = await getComplaints(filters, {
-          page,
-          perPage: 20,
-          sort: "-created",
-        });
-
-        if (!mounted) return;
-
-        setComplaints(transformComplaints(result.items as any[]));
-        setTotalPages(result.totalPages);
-
-        setLoading(false);
-        setInitialLoading(false);
-
-        // Subscribe realtime (hanya untuk updates, bukan untuk initial load)
-        try {
-          unsubscribe = await pb
-            .collection("complaints")
-            .subscribe("*", (e) => {
-              if (!mounted) return;
-
-              if (
-                e.action === "create" ||
-                e.action === "update" ||
-                e.action === "delete"
-              ) {
-                // Reload data ketika ada perubahan (SILENT REFETCH)
-                init();
-              }
-            });
-        } catch (err) {
-          const error = err as { isAbort?: boolean };
-          if (error?.isAbort !== true) {
-            console.error("Subscribe error:", err);
-          }
-        }
-      } catch (err) {
-        const error = err as { isAbort?: boolean };
-        if (mounted && error?.isAbort !== true) {
-          console.error("Load error:", err);
-          if (initialLoading) {
-            setLoading(false);
-            setInitialLoading(false);
-          }
-        }
+      // Status
+      if (filters.status && filters.status !== "all") {
+        filtered = filtered.filter(c => c.status === filters.status);
       }
-    };
 
-    init();
+      // Search Text
+      if (filters.searchText) {
+        const search = filters.searchText.toLowerCase();
+        filtered = filtered.filter(c => 
+          c.title?.toLowerCase().includes(search) ||
+          c.description?.toLowerCase().includes(search)
+        );
+      }
 
-    return () => {
-      mounted = false;
-      if (unsubscribe) unsubscribe();
-    };
-  }, [filters, page, enabled]);
+      // Creator (if specified in filters)
+      if (filters.creator) {
+        filtered = filtered.filter(c => c.creator === filters.creator);
+      }
+
+      // Sorting
+      filtered.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+
+      // Pagination
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      
+      setComplaints(transformComplaints(filtered.slice(start, end)));
+      setTotalPages(Math.ceil(filtered.length / perPage));
+
+    } catch (err) {
+      console.error("Local complaints load error:", err);
+    } finally {
+      setLoading(false);
+      setInitialLoading(false);
+    }
+  }, [isReady, admin?.id, page, perPage, filters]);
+
+  useEffect(() => {
+    if (isReady) {
+      loadLocalData();
+    }
+  }, [isReady, loadLocalData]);
 
   return {
     complaints,
@@ -129,6 +110,5 @@ export const useAdminComplaints = (
     initialLoading,
     totalPages,
     users,
-    loadUsers,
   };
 };

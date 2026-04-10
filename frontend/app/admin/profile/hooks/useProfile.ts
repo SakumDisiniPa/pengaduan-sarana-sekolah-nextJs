@@ -63,7 +63,7 @@ export const useProfile = (): UseProfileResult => {
       
       // Update state lokal agar UI langsung berubah
       setUser(updated);
-    } catch (err: any) {
+    } catch (err: unknown) {
       throw err; // Lempar error agar bisa ditangkap oleh ProfilePage untuk ditampilkan di Alert
     } finally {
       setIsSaving(false);

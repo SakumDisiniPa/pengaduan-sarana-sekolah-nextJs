@@ -7,7 +7,7 @@ import {
   serverSendNotification, 
   serverSendBulkNotification 
 } from "@/app/actions/notifications";
-import type { User, Message } from "../types";
+import type { User } from "../types";
 
 /**
  * Send chat notification ke user
@@ -23,7 +23,7 @@ export async function sendChatNotification(
   try {
     // Potong isi pesan jika terlalu panjang
     const shortContent = messageContent.substring(0, 100);
-    const title = `Pesan dari ${sender.name || sender.email}`;
+    const title = "Admin - Pesan Baru";
     
     const data = {
       type: "chat",

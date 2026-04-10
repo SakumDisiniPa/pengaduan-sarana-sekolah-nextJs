@@ -13,8 +13,8 @@ export default function AdminKategoriCreatePage() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    if (!pb.authStore.isValid || !pb.authStore.model?.isAdmin) {
+    setTimeout(() => setIsClient(true), 0);
+    if (pb.authStore.isValid && !pb.authStore.model?.isAdmin) {
       router.push("/admin/login");
     }
   }, [router]);
@@ -30,11 +30,14 @@ export default function AdminKategoriCreatePage() {
     try {
       await pb.collection("categories").create({ name: trimmed });
       router.push("/admin/kategori");
-    } catch (err: any) {
-      if (err.message?.includes("unique") || err.data?.data?.name?.code === "validation_not_unique") {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      const errorData = (err as { data?: { data?: { name?: { code?: string } } } }).data;
+
+      if (message.includes("unique") || errorData?.data?.name?.code === "validation_not_unique") {
         setError(`Kategori "${trimmed}" sudah ada. Gunakan nama lain.`);
       } else {
-        setError(err.message || "Gagal menambahkan kategori");
+        setError(message);
       }
       setSubmitting(false);
     }

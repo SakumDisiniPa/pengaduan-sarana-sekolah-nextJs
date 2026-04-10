@@ -46,9 +46,10 @@ export async function saveMfaToDb(userId: string, secret: string) {
     });
 
     return { success: true };
-  } catch (err: any) {
-    console.error("Save MFA to DB Error:", err.message);
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Save MFA to DB Error:", message);
+    return { success: false, error: message };
   }
 }
 
@@ -67,9 +68,9 @@ export async function verifyMfaCode(secret: string, token: string) {
       epochTolerance: [30, 0], 
     });
 
-    console.log("MFA Setup Verify result:", result.valid);
-    return result.valid;
-  } catch (err: any) {
+    console.log("MFA Setup Verify result:", result);
+    return !!(typeof result === "boolean" ? result : result.valid);
+  } catch (err: unknown) {
     console.error("MFA Setup Verify Error:", err);
     return false;
   }
@@ -104,7 +105,7 @@ export async function verifyMfaCodeByUserId(userId: string, token: string) {
       afterTimeStep: user.lastTimeStep || 0
     });
 
-    const mfaStatus = result as any;
+    const mfaStatus = result as { valid: boolean; timeStep: number };
 
     if (mfaStatus.valid) {
       // Update lastTimeStep biar aman dari Replay Attack
@@ -114,8 +115,9 @@ export async function verifyMfaCodeByUserId(userId: string, token: string) {
       return true;
     }
     return false;
-  } catch (err: any) {
-    console.error("MFA Superuser Mode Error:", err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("MFA Superuser Mode Error:", message);
     return false;
   }
 }

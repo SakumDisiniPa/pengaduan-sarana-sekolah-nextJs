@@ -19,8 +19,14 @@ import {
 } from "./utils/messageHelpers";
 import type { User, Message } from "./types";
 
+import useSyncEngine from "@/hooks/useSyncEngine";
+import SyncOverlay from "@/components/admin/SyncOverlay";
+
 export default function AdminChatsPage() {
-  const { messages, loading } = useChats();
+  // 1. Sync Engine
+  const { isSyncing, progress, isReady, error: syncError } = useSyncEngine();
+
+  const { messages, loading } = useChats(isReady);
   const [text, setText] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [contextMenu, setContextMenu] = useState<{ message: Message; x: number; y: number } | null>(null);
@@ -53,13 +59,13 @@ export default function AdminChatsPage() {
 
   // Auto-scroll saat ganti user atau pesan baru masuk
   useEffect(() => {
-  if (selectedUser) {
-    const timer = setTimeout(() => {
-      scrollToBottom("auto");
-    }, 100);
-    return () => clearTimeout(timer);
-  }
-}, [scrollToBottom, messages.length, selectedUser]);
+    if (selectedUser) {
+      const timer = setTimeout(() => {
+        scrollToBottom("auto");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [scrollToBottom, messages.length, selectedUser]);
 
   // 3. Action Handlers
   const handleContextMenu = (e: React.MouseEvent, message: Message) => {
@@ -118,67 +124,74 @@ export default function AdminChatsPage() {
   if (loading) return <LoadingState />;
 
   return (
-    <div className="relative h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden flex flex-col">
-      {/* Container utama dengan padding agar tidak nempel layar */}
-      <div className="flex-1 mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8 flex flex-col min-h-0">
+    <div className="relative h-screen bg-[#f0f2f5] dark:bg-zinc-950 overflow-hidden flex flex-col">
+      <SyncOverlay 
+        isSyncing={isSyncing} 
+        progress={progress} 
+        isReady={isReady} 
+        error={syncError} 
+      />
+      
+      {/* Container Utama: Full Screen Style */}
+      <div className="flex-1 flex overflow-hidden shadow-2xl">
         
-        {/* Box Utama Chat - h-[80vh] atau h-full untuk menyesuaikan container */}
-        <div className="grid h-full min-h-0 grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 dark:bg-zinc-900 lg:grid-cols-4">
-          
-          {/* Sidebar: Harus bisa scroll sendiri kalau user banyak */}
-          <ChatSidebar 
-            users={users}
-            messages={messages}
-            selectedUser={selectedUser} 
-            onSelectUser={setSelectedUser} 
-          />
+        {/* Sidebar */}
+        <ChatSidebar 
+          users={users}
+          messages={messages}
+          selectedUser={selectedUser} 
+          onSelectUser={setSelectedUser} 
+        />
 
-          {/* Chat Area: Mengunci scroll di tengah saja */}
-          <div className="flex h-full min-h-0 flex-col lg:col-span-3 bg-white dark:bg-zinc-900 border-l dark:border-zinc-800">
-            {selectedUser ? (
-              <>
-                {/* Header (Tinggi mengikuti isi) */}
-                <ChatHeader selectedUser={selectedUser} />
-                
-                {/* Area Pesan (Mengambil sisa ruang & SCROLL AKTIF DI SINI) */}
+        {/* Chat Area */}
+        <div className="flex flex-col flex-1 bg-[#efeae2] dark:bg-zinc-900 relative">
+          {/* Subtle Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.02] pointer-events-none bg-[url('https://wallpaperaccess.com/full/1288076.jpg')] bg-repeat" />
+
+          {selectedUser ? (
+            <div className="flex flex-col h-full relative z-10">
+              <ChatHeader selectedUser={selectedUser} />
+              
+              <div className="flex-1 flex flex-col overflow-hidden relative">
                 <MessagesList 
                   groupedMessages={groupedMessages} 
                   messagesEndRef={messagesEndRef}
                   onContextMenu={handleContextMenu}
                 />
+              </div>
+
+              {/* Edit indicator */}
+              {editingMessage && (
+                <div className="bg-blue-50 dark:bg-blue-900/30 border-t border-blue-200 dark:border-blue-800 px-4 py-2 flex items-center justify-between">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">
+                    ✏️ Editing: &quot;{editingMessage.text.substring(0, 50)}&quot;...
+                  </span>
+                  <button
+                    onClick={() => {
+                      setEditingMessage(null);
+                      setText("");
+                    }}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
                 
-                {/* Edit indicator */}
-                {editingMessage && (
-                  <div className="bg-blue-50 dark:bg-blue-900/30 border-t border-blue-200 dark:border-blue-800 px-4 py-2 flex items-center justify-between">
-                    <span className="text-sm text-blue-700 dark:text-blue-300">
-                      ✏️ Editing: &quot;{editingMessage.text.substring(0, 50)}&quot;...
-                    </span>
-                    <button
-                      onClick={() => {
-                        setEditingMessage(null);
-                        setText("");
-                      }}
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-                
-                {/* Input (Tetap di bawah) */}
-                <ChatInput 
-                  text={text} 
-                  sending={sending} 
-                  onTextChange={setText} 
-                  onSend={handleSend}
-                  placeholder={editingMessage ? "Edit pesan..." : "Tulis pesan..."}
-                />
-              </>
-            ) : (
+              {/* Input */}
+              <ChatInput 
+                text={text} 
+                sending={sending} 
+                onTextChange={setText} 
+                onSend={handleSend}
+                placeholder={editingMessage ? "Edit pesan..." : "Tulis pesan..."}
+              />
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
               <EmptyState />
-            )}
-          </div>
-          
+            </div>
+          )}
         </div>
       </div>
 

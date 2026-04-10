@@ -24,11 +24,11 @@ export const useComplaintDetail = (
           expand: "creator,categories",
           requestKey: null,
         });
-        const transformedData = transformComplaint(record);
+        const transformedData = transformComplaint(record as Record<string, unknown>);
         setComplaint(transformedData);
         isFetched.current = true;
-      } catch (err: any) {
-        if (!err.isAbort) {
+      } catch (err: unknown) {
+        if (!(err as { isAbort?: boolean }).isAbort) {
           setError(
             "Gagal memuat detail pengaduan. Halaman mungkin tidak ditemukan."
           );
@@ -43,16 +43,22 @@ export const useComplaintDetail = (
     }
 
     // --- REALTIME SUBSCRIPTION ---
-    pb.collection("complaints").subscribe(complaintId, (e) => {
+    pb.collection("complaints").subscribe(complaintId, async (e) => {
       if (e.action === "update") {
-        setComplaint((prev) => {
-          if (!prev) return prev;
-          const updated = transformComplaint(e.record);
-          return {
-            ...prev,
-            ...updated,
-          };
-        });
+        try {
+          // Re-fetch full record with expansions to avoid "Unknown" data
+          const fullRecord = await pb.collection("complaints").getOne(complaintId, {
+            expand: "creator,categories",
+            requestKey: null
+          });
+          const transformedData = transformComplaint(fullRecord as Record<string, unknown>);
+          setComplaint(transformedData);
+        } catch (err) {
+          console.error("Error refreshing real-time update:", err);
+          // Fallback to partial update if fetch fails (not ideal but better than nothing)
+          const transformedPartial = transformComplaint(e.record as Record<string, unknown>);
+          setComplaint((prev) => prev ? { ...prev, ...transformedPartial } : prev);
+        }
       } else if (e.action === "delete") {
         setError("Laporan ini baru saja dihapus.");
         setComplaint(null);

@@ -19,7 +19,15 @@ export default function AdminLoginPage() {
     setError(null);
     try {
       const authRes = await pb.collection("users").authWithPassword(email, password);
-      if (authRes.record?.isAdmin) {
+      const record = authRes.record;
+
+      // Check if banned
+      if (record.isBanned && record.bannedUntil && new Date(record.bannedUntil) > new Date()) {
+        router.push("/blocked");
+        return;
+      }
+
+      if (record.isAdmin) {
         router.push("/admin");
       } else {
         pb.authStore.clear();
