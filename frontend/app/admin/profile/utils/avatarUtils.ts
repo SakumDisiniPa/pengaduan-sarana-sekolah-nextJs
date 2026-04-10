@@ -15,7 +15,7 @@ export const handleAvatarFileChange = (
 export const getAvatarUrl = (user: ProfileUser): string | null => {
   if (!user.avatar) return null;
   return pb.files.getURL(
-    { id: user.id, collectionId: user.collectionId, collectionName: user.collectionName } as any,
+    { id: user.id, collectionId: user.collectionId, collectionName: user.collectionName } as unknown as { [key: string]: unknown; id: string; collectionId: string; collectionName: string },
     user.avatar
   );
 };

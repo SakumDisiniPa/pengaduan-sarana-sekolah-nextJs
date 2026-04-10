@@ -4,6 +4,7 @@ import { useEffect, useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { pb } from "@/lib/pocketbase";
+import Image from "next/image";
 import { Menu, Transition } from "@headlessui/react";
 import { Menu as MenuIcon, X, User, LogOut } from "lucide-react";
 
@@ -57,6 +58,7 @@ export default function Header() {
     { name: "Admin Chat", href: "/admin/chats", requiresAdmin: true },
     { name: "Complaints", href: "/admin/complaints", requiresAdmin: true },
     { name: "Kategori", href: "/admin/kategori", requiresAdmin: true },
+    { name: "Users", href: "/admin/users", requiresAdmin: true },
   ];
 
   const filteredNav = navigation.filter((item) => {
@@ -104,11 +106,13 @@ export default function Header() {
                 <Menu as="div" className="relative">
                   <Menu.Button className="flex items-center space-x-2 text-sm font-medium text-white/90 hover:text-white focus:outline-none group">
                     {avatarUrl ? (
-                      <img
+                      <Image
                         src={avatarUrl}
                         alt={displayName || "User"}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full ring-2 ring-white shadow-lg transition-transform group-hover:scale-110 object-cover"
-                        referrerPolicy="no-referrer"
+                        unoptimized
                       />
                     ) : (
                       <span className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white ring-2 ring-white shadow-lg transition-transform group-hover:scale-110">
@@ -131,11 +135,13 @@ export default function Header() {
                       <div className="px-4 py-3 border-b border-gray-100">
                         <div className="flex items-center gap-3">
                           {avatarUrl ? (
-                            <img
+                            <Image
                               src={avatarUrl}
                               alt={displayName || "User"}
+                              width={40}
+                              height={40}
                               className="w-10 h-10 rounded-full object-cover"
-                              referrerPolicy="no-referrer"
+                              unoptimized
                             />
                           ) : (
                             <span className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
@@ -235,11 +241,13 @@ export default function Header() {
                 <>
                   <div className="flex items-center space-x-3 px-4 py-2 text-sm text-white/90 border-t border-white/20">
                     {avatarUrl ? (
-                      <img
+                      <Image
                         src={avatarUrl}
                         alt={displayName || "User"}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full object-cover"
-                        referrerPolicy="no-referrer"
+                        unoptimized
                       />
                     ) : (
                       <span className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">

@@ -2,7 +2,7 @@ export type Complaint = {
   id: string;
   title: string;
   description: string;
-  status?: string;
+  status: string;
   category?: string;
   priority?: string;
   created: string;
@@ -11,6 +11,7 @@ export type Complaint = {
   creator?: string | User;
   location?: string;
   photo?: string;
+  completion_proof?: string;
   categories?: string;
   expand?: {
     creator?: User;

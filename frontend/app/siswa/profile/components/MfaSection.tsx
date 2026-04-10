@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface MfaSectionProps {
   mfaEnabled: boolean;
@@ -70,7 +71,16 @@ export function MfaSection({
           </p>
 
           <div className="bg-white p-4 rounded-xl inline-block mb-6 shadow-inner mx-auto w-full flex justify-center">
-            <img src={setupQr} alt="MFA QR Code" className="w-48 h-48" />
+            {setupQr && (
+              <Image 
+                src={setupQr} 
+                alt="MFA QR Code" 
+                width={192} 
+                height={192} 
+                className="w-48 h-48" 
+                unoptimized // Since QR codes are dynamic data URLs usually
+              />
+            )}
           </div>
 
           <h3 className="font-semibold text-white mb-2 text-sm">

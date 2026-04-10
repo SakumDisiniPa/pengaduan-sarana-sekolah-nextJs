@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import OneSignalInit from "./components/OneSignalInit";
+import BanGuard from "../components/BanGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <OneSignalInit />
+        <BanGuard />
         <Header />
         {children}
       </body>

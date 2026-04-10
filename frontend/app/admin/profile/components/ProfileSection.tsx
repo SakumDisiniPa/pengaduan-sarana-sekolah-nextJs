@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { getInitialLetter } from "../utils";
 import { User, Pencil, X } from "lucide-react";
+import Image from "next/image";
 
 interface ProfileSectionProps {
   name: string;
@@ -41,13 +42,12 @@ export function ProfileSection({
             {/* Foto Profile */}
             <div className="w-24 h-24 rounded-full border-2 border-purple-500/50 shadow-lg overflow-hidden bg-slate-800 flex items-center justify-center group-hover:border-purple-400 transition-all">
               {avatarUrl ? (
-                <img
+                <Image
                   src={avatarUrl}
                   alt="Profile"
+                  fill
                   className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
+                  unoptimized
                 />
               ) : (
                 <span className="text-3xl font-bold text-slate-400">
@@ -92,10 +92,12 @@ export function ProfileSection({
 
             <div className="relative w-full max-w-sm aspect-[3/4] bg-slate-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
               {avatarUrl ? (
-                <img
+                <Image
                   src={avatarUrl}
                   alt="Full Preview"
+                  fill
                   className="w-full h-full object-cover"
+                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">

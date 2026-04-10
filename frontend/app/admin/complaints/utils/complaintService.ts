@@ -21,9 +21,10 @@ export const updateComplaintStatus = async (
 ): Promise<void> => {
   try {
     await pb.collection("complaints").update(id, { status });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error updating status:", err);
-    alert("Gagal memperbarui status: " + err.message);
+    const message = err instanceof Error ? err.message : "Gagal memperbarui status";
+    alert(message);
     throw err;
   }
 };
@@ -38,9 +39,10 @@ export const sendAdminReply = async (
 
   try {
     await pb.collection("complaints").update(id, { admin_reply: adminReply });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error sending reply:", err);
-    alert("Gagal mengirim balasan: " + err.message);
+    const message = err instanceof Error ? err.message : "Gagal mengirim balasan";
+    alert(message);
     throw err;
   }
 };
@@ -51,9 +53,10 @@ export const updateComplaintCategory = async (
 ): Promise<void> => {
   try {
     await pb.collection("complaints").update(id, { categories });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error updating categories:", err);
-    alert("Gagal memperbarui kategori: " + err.message);
+    const message = err instanceof Error ? err.message : "Gagal memperbarui kategori";
+    alert(message);
     throw err;
   }
 };

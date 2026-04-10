@@ -25,7 +25,6 @@ export async function adminUpdatePassword(userId: string, newPassword: string) {
     await pb.collection("users").authWithPassword(userData.email, newPassword);
 
     // 4. Export Auth Store ke Cookie Browser
-    const cookie = pb.authStore.exportToCookie({ httpOnly: false });
     // Kita set cookie manual ke browser via Next.js Headers
     cookieStore.set("pb_auth", pb.authStore.token, { 
       path: "/", 
@@ -34,7 +33,8 @@ export async function adminUpdatePassword(userId: string, newPassword: string) {
     });
 
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: message };
   }
 }

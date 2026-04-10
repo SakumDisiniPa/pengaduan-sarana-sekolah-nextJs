@@ -1,20 +1,15 @@
 "use server"
-/**
- * OneSignal User Tagging Utility
- * 
- * Menandai user di OneSignal dengan tags agar notifikasi bisa di-target
- * Panggil fungsi ini saat user login atau update profile
- */
-
 import { setOneSignalUserTags } from "@/lib/onesignal";
+import { AuthModel } from "pocketbase";
 
 /**
  * Setup identifikasi user di OneSignal saat login
  * @param user - User dari PocketBase
  * @param oneSignalId - ID dari OneSignal SDK
  */
-export async function setupOneSignalUser(user: any, oneSignalId?: string) {
+export async function setupOneSignalUser(user: AuthModel | null, oneSignalId?: string) {
   try {
+    if (!user) return false;
     if (!oneSignalId && typeof window !== "undefined") {
       // Cek localStorage untuk OneSignal ID jika tidak diberikan
       oneSignalId = localStorage.getItem("oneSignalId") || undefined;
@@ -26,9 +21,9 @@ export async function setupOneSignalUser(user: any, oneSignalId?: string) {
     }
 
     // Set external ID untuk matching dengan database
-    const tags: Record<string, any> = {
+    const tags: Record<string, unknown> = {
       // User ID dari PocketBase
-      user_id: user.id,
+      user_id: user?.id,
       
       // Email
       email: user.email,
@@ -45,15 +40,15 @@ export async function setupOneSignalUser(user: any, oneSignalId?: string) {
     };
 
     // Jika user adalah admin, tambahkan tag khusus
-    if (user.isAdmin) {
+    if (user?.isAdmin) {
       tags.notification_type = "admin";
     } else {
       tags.notification_type = "user";
-      tags.user_id_pocketbase = user.id;
+      tags.user_id_pocketbase = user?.id;
     }
 
     // Set tags di OneSignal
-    const success = await setOneSignalUserTags(user.id, tags);
+    const success = await setOneSignalUserTags(user?.id || "", tags);
     
     if (success) {
       console.log("OneSignal user tags set successfully");
@@ -73,7 +68,7 @@ export async function setupOneSignalUser(user: any, oneSignalId?: string) {
  */
 export async function updateOneSignalUserTags(
   userId: string,
-  updates: Record<string, any>
+  updates: Record<string, unknown>
 ) {
   try {
     const success = await setOneSignalUserTags(userId, updates);
@@ -98,8 +93,9 @@ export async function cleanupOneSignalOnLogout() {
       localStorage.removeItem("oneSignalId");
       
       // Optional: unsubscribe dari push notifications
-      if ((window as any).OneSignal) {
-        // await OneSignal.unsubscribeFromPushNotifications();
+      const win = window as unknown as { OneSignal?: { unsubscribeFromPushNotifications?: () => Promise<void> } };
+      if (win.OneSignal) {
+        // await win.OneSignal.unsubscribeFromPushNotifications?.();
       }
       
       console.log("OneSignal cleanup completed");

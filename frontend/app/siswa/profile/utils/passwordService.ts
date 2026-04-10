@@ -19,8 +19,8 @@ export const changePassword = async (
     if (!res.success) {
       throw new Error(res.error || "Gagal mengubah password");
     }
-  } catch (err: any) {
-    console.error("Error changing password:", err);
-    throw new Error(err.message || "Gagal mengubah password");
+  } catch (err: unknown) {
+    console.error("Change password error:", err);
+    throw new Error((err as Error).message || "Terjadi kesalahan sistem saat mengubah password");
   }
 };

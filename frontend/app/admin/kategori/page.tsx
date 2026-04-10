@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { pb } from "@/lib/pocketbase";
-import { useCategories, Category } from "@/lib/categories";
+import { useCategories } from "@/lib/categories";
 import Link from "next/link";
 import { Tag, List, CheckCircle2, AlertCircle, Edit2, Trash2, Inbox } from "lucide-react";
+
+type Category = {
+  id: string;
+  name: string;
+};
 
 export default function AdminKategoriPage() {
   const router = useRouter();
@@ -45,8 +50,9 @@ export default function AdminKategoriPage() {
       await pb.collection("categories").delete(cat.id);
       setMessage({ text: `Kategori "${cat.name}" berhasil dihapus`, type: "success" });
       refetch();
-    } catch (err: any) {
-      setMessage({ text: err.message || "Gagal menghapus kategori", type: "error" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Gagal menghapus kategori";
+      setMessage({ text: message, type: "error" });
     } finally {
       setDeleting(null);
       setTimeout(() => setMessage(null), 3000);
@@ -101,12 +107,12 @@ export default function AdminKategoriPage() {
           </div>
         )}
 
-        {/* Ta<List className="w-5 h-5" />e Container */}
+        {/* Table Container */}
         <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10">
           {/* Table Header */}
           <div className="bg-white/5 px-4 sm:px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              📋 Daftar Kategori
+              <List className="w-5 h-5" /> Daftar Kategori
             </h2>
             <span className="text-xs text-slate-400 bg-white/5 px-3 py-1 rounded-full">
               {categories.length} kategori
@@ -122,7 +128,7 @@ export default function AdminKategoriPage() {
             <div className="text-center py-16 px-4">
               <Inbox className="w-16 h-16 text-slate-400 mx-auto mb-2" />
               <p className="text-slate-400 text-lg mb-2">Belum ada kategori</p>
-              <p className="text-slate-500 text-sm">Klik tombol "Tambah Kategori" untuk mulai menambahkan.</p>
+              <p className="text-slate-500 text-sm">Klik tombol &quot;Tambah Kategori&quot; untuk mulai menambahkan.</p>
             </div>
           ) : (
             <>

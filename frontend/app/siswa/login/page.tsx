@@ -43,7 +43,13 @@ function SiswaLoginContent() {
     pb.collection("users")
       .authWithOAuth2({ provider: "google" })
       .then((authData) => {
-        const userEmail = authData.record?.email || "";
+        const record = authData.record;
+        if (record.isBanned && record.bannedUntil && new Date(record.bannedUntil) > new Date()) {
+          router.push("/blocked");
+          return;
+        }
+
+        const userEmail = record?.email || "";
         if (!userEmail.endsWith("@smkn1padaherang.sch.id")) {
           pb.authStore.clear();
           showMessage("Hanya email @smkn1padaherang.sch.id yang diizinkan.", "error");
@@ -88,6 +94,14 @@ function SiswaLoginContent() {
 
       const record = authRes.record;
 
+      if (record.isBanned && record.bannedUntil && new Date(record.bannedUntil) > new Date()) {
+        showMessage("Akun Anda diblokir. Mengalihkan ke halaman info...", "error");
+        setTimeout(() => {
+          router.push("/blocked");
+        }, 1500);
+        return;
+      }
+
       if (record.isAdmin) {
         showMessage("Akun ini adalah admin. Silakan login pada form Admin.", "error");
         setLoading(false);
@@ -105,7 +119,7 @@ function SiswaLoginContent() {
         router.push(`/siswa/login?token=${tempPb.authStore.token}&mfa=true`);
         setLoading(false);
       }, 600);
-    } catch (err: any) {
+    } catch {
       showMessage("Email/NIS tidak terdaftar atau password salah.", "error");
       setLoading(false);
     }
@@ -121,7 +135,7 @@ function SiswaLoginContent() {
     try {
       const payload = JSON.parse(atob(tokenParam.split(".")[1]));
       userId = payload.id;
-    } catch (err) {
+    } catch {
       showMessage("Sesi tidak valid. Silakan login kembali.", "error");
       setLoading(false);
       return;
@@ -135,7 +149,7 @@ function SiswaLoginContent() {
         pb.authStore.save(tokenParam, null);
         try {
           await pb.collection("users").authRefresh();
-        } catch (err) {
+        } catch {
           showMessage("Sesi telah kadaluarsa. Silakan login kembali.", "error");
           setLoading(false);
           return;
@@ -145,13 +159,20 @@ function SiswaLoginContent() {
           httpOnly: false,
           path: "/",
         });
+
+        // Double check ban status after refresh
+        if (pb.authStore.model?.isBanned && pb.authStore.model?.bannedUntil && new Date(pb.authStore.model.bannedUntil) > new Date()) {
+          router.push("/blocked");
+          return;
+        }
+
         showMessage("Verifikasi berhasil! Mengalihkan ke dashboard...", "success");
         setTimeout(() => router.push("/siswa/dashboard"), 800);
       } else {
         showMessage("Kode MFA salah atau kadaluarsa.", "error");
         setLoading(false);
       }
-    } catch (err: any) {
+    } catch {
       showMessage("Gagal memverifikasi MFA.", "error");
       setLoading(false);
     }

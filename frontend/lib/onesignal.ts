@@ -19,7 +19,7 @@ export async function sendNotification(
   externalUserId: string,
   title: string,
   content: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ) {
   try {
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
@@ -63,7 +63,7 @@ export async function sendNotification(
 export async function sendAdminNotification(
   title: string,
   content: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ) {
   try {
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
@@ -113,7 +113,7 @@ export async function sendBulkNotification(
   userIds: string[],
   title: string,
   content: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ) {
   try {
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
@@ -152,7 +152,7 @@ export async function sendBulkNotification(
  */
 export async function setOneSignalUserTags(
   externalUserId: string,
-  tags: Record<string, any>
+  tags: Record<string, unknown>
 ) {
   try {
     const response = await fetch(

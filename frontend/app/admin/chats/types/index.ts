@@ -3,6 +3,7 @@ export type User = {
   email: string;
   isAdmin?: boolean;
   name?: string;
+  avatar?: string;
 };
 
 export type Message = {

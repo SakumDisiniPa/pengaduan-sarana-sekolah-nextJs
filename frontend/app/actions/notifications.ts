@@ -23,7 +23,7 @@ export async function serverSendBulkNotification(
   userIds: string[],
   title: string,
   content: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ) {
   try {
     console.log("Sending notification to admins:", {
@@ -51,7 +51,7 @@ export async function serverSendBulkNotification(
       headings: { en: title },
       contents: { en: content },
       data: data || {},
-      web_url: getAbsoluteUrl(data?.webUrl),
+      web_url: getAbsoluteUrl(data?.webUrl as string | undefined),
     };
 
 
@@ -90,7 +90,7 @@ export async function serverSendNotification(
   externalUserId: string,
   title: string,
   content: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ) {
   try {
     console.log("Sending notification to user:", {
@@ -118,7 +118,7 @@ export async function serverSendNotification(
         headings: { en: title },
         contents: { en: content },
         data: data || {},
-        web_url: getAbsoluteUrl(data?.webUrl),
+        web_url: getAbsoluteUrl(data?.webUrl as string | undefined),
       }),
     });
 

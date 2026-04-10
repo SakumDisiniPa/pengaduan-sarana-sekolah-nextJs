@@ -20,7 +20,7 @@ function EditKategoriForm() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    setTimeout(() => setIsMounted(true), 0);
   }, []);
 
   useEffect(() => {
@@ -79,11 +79,14 @@ function EditKategoriForm() {
       setTimeout(() => {
         router.push("/admin/kategori");
       }, 1500);
-    } catch (err: any) {
-      if (err.message?.includes("unique") || err.data?.data?.name?.code === "validation_not_unique") {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      const errorData = (err as { data?: { data?: { name?: { code?: string } } } }).data;
+
+      if (message.includes("unique") || errorData?.data?.name?.code === "validation_not_unique") {
         setError(`Kategori "${trimmed}" sudah ada. Gunakan nama lain.`);
       } else {
-        setError(err.message || "Gagal memperbarui kategori");
+        setError(message);
       }
       setSubmitting(false);
     }
@@ -114,7 +117,7 @@ function EditKategoriForm() {
           ✏️ Edit <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Kategori</span>
         </h1>
         <p className="text-slate-400 mb-8 text-sm">
-          Ubah nama kategori <span className="text-slate-300 font-medium">"{originalName}"</span>
+          Ubah nama kategori <span className="text-slate-300 font-medium">&quot;{originalName}&quot;</span>
         </p>
 
         {/* Error Alert */}

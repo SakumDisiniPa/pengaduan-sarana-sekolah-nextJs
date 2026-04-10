@@ -15,8 +15,8 @@ export interface Complaint {
   title: string;
   description: string;
   status: string;
-  creator: string | User;
-  location: string;
+  creator?: string | User;
+  location?: string;
   photo?: string;
 }
 
@@ -74,23 +74,23 @@ export async function notifyComplaintStatusChange(
   try {
     const statusMessages: Record<string, { title: string; message: string }> = {
       "diproses": {
-        title: "Laporan Sedang Diproses",
-        message: `pengaduan anda dengan judul ${complaint.title} sedang di proses`
+        title: "Admin - Laporan Diproses",
+        message: `Laporan "${complaint.title}" sedang diproses oleh tim admin.`
       },
       "selesai": {
-        title: "Laporan Selesai Diperbaiki",
-        message: `pengaduan anda dengan judul ${complaint.title} sudah selesai diperbaiki, terimakasih sudah membuat laporan`
+        title: "Admin - Laporan Selesai",
+        message: `Laporan "${complaint.title}" telah selesai diperbaiki. Terima kasih atas laporannya.`
       },
       "ditolak": {
-        title: "Laporan Ditolak",
-        message: `Laporan "${complaint.title}" telah kami tinjau kembali. ${updateDescription || "Silakan hubungi admin untuk informasi lebih lanjut."}`
+        title: "Admin - Laporan Ditolak",
+        message: `Laporan "${complaint.title}" ditolak. ${updateDescription || "Silakan hubungi admin untuk informasi lebih lanjut."}`
       }
     };
 
 
     const statusInfo = statusMessages[newStatus] || {
-      title: "Pembaruan Status Laporan",
-      message: `Status laporan "${complaint.title}" telah berubah menjadi: ${newStatus}`
+      title: "Admin - Pembaruan Status",
+      message: `Status laporan "${complaint.title}" telah diperbarui menjadi: ${newStatus}`
     };
 
     const data = {
@@ -109,6 +109,44 @@ export async function notifyComplaintStatusChange(
     );
   } catch (error) {
     console.error("Error notifying status change:", error);
+    return null;
+  }
+}
+
+/**
+ * Send notification ke student saat admin memberikan balasan/respon
+ * @param complaint - Data complaint
+ * @param creatorId - ID creator
+ * @param replyMessage - Isi balasan admin
+ */
+export async function notifyStudentOfAdminReply(
+  complaint: Complaint,
+  creatorId: string,
+  replyMessage: string
+) {
+  try {
+    const title = "Admin - Balasan Baru";
+    // Bersihkan isi pesan agar tidak terlalu panjang di notifikasi push
+    const previewMessage = replyMessage.length > 50 
+      ? replyMessage.substring(0, 47) + "..." 
+      : replyMessage;
+      
+    const message = `Admin memberikan balasan: "${previewMessage}"`;
+
+    const data = {
+      type: "admin_reply",
+      complaintId: complaint.id,
+      webUrl: `/siswa/complaints/detail/${complaint.id}`,
+    };
+
+    return await serverSendNotification(
+      creatorId,
+      title,
+      message,
+      data
+    );
+  } catch (error) {
+    console.error("Error notifying admin reply:", error);
     return null;
   }
 }

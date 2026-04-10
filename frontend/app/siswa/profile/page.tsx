@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [isClient, setIsClient] = useState(false);
 
   // Hooks
-  const { user, avatarUrl, loading: profileLoading, saveProfile, isSaving } = useProfile();
+  const { user, avatarUrl, saveProfile, isSaving } = useProfile();
   const { message, showMessage } = useMessage();
   const mfa = useMfa(user?.mfaEnabled || false);
 
@@ -44,7 +44,7 @@ export default function ProfilePage() {
       setAvatarPreview(avatarUrl);
       mfa.setMfaEnabled(user.mfaEnabled || false);
     }
-  }, [user, avatarUrl]);
+  }, [user, avatarUrl, mfa]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const result = handleAvatarFileChange(e);
@@ -62,8 +62,8 @@ export default function ProfilePage() {
       await saveProfile(name, avatar);
       setAvatar(undefined);
       showMessage("Profil berhasil diperbarui", "success");
-    } catch (err: any) {
-      showMessage(err.message || "Gagal memperbarui profil", "error");
+    } catch (err: unknown) {
+      showMessage((err as Error).message || "Gagal memperbarui profil", "error");
     }
   };
 
@@ -77,8 +77,8 @@ export default function ProfilePage() {
       showMessage("Password berhasil diperbarui", "success");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      showMessage(err.message || "Gagal mengubah password", "error");
+    } catch (err: unknown) {
+      showMessage((err as Error).message || "Gagal mengubah password", "error");
     } finally {
       setSavingPassword(false);
     }
@@ -88,8 +88,8 @@ export default function ProfilePage() {
     if (!user) return;
     try {
       await mfa.startSetup(user.email);
-    } catch (err: any) {
-      showMessage(err.message || "Gagal menginisialisasi MFA", "error");
+    } catch (err: unknown) {
+      showMessage((err as Error).message || "Gagal menginisialisasi MFA", "error");
     }
   };
 
@@ -98,8 +98,8 @@ export default function ProfilePage() {
     try {
       await mfa.confirmSetup(user.id, mfa.mfaToken);
       showMessage("MFA berhasil diaktifkan", "success");
-    } catch (err: any) {
-      showMessage(err.message || "Gagal mengaktifkan MFA", "error");
+    } catch (err: unknown) {
+      showMessage((err as Error).message || "Gagal mengaktifkan MFA", "error");
     }
   };
 
@@ -111,8 +111,8 @@ export default function ProfilePage() {
     try {
       await mfa.disableMfa(user.id);
       showMessage("MFA telah dinonaktifkan", "success");
-    } catch (err: any) {
-      showMessage(err.message || "Gagal menonaktifkan MFA", "error");
+    } catch (err: unknown) {
+      showMessage((err as Error).message || "Gagal menonaktifkan MFA", "error");
     }
   };
 

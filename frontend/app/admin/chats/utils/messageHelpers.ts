@@ -5,15 +5,36 @@ export const getInitial = (u?: User) => {
   return display.charAt(0).toUpperCase();
 };
 
-export const getUniqueUsers = (messages: Message[]): User[] => {
-  const userMap = new Map<string, User>();
+export const getUniqueUsers = (messages: Message[], options: { forAdmin: boolean } = { forAdmin: true }): User[] => {
+  const userMap = new Map<string, { user: User; lastTime: number }>();
+  
   messages.forEach((msg) => {
     const s = msg.expand?.sender;
     const r = msg.expand?.recipient;
-    if (s && !s.isAdmin) userMap.set(s.id, s);
-    if (r && !r.isAdmin) userMap.set(r.id, r);
+    const time = new Date(msg.created).getTime();
+
+    const processUser = (u?: User) => {
+      if (!u) return;
+      
+      // Jika kita admin, kita ingin lihat siswa (!isAdmin)
+      // Jika kita siswa, kita ingin lihat admin (isAdmin)
+      const shouldInclude = options.forAdmin ? !u.isAdmin : u.isAdmin;
+
+      if (shouldInclude) {
+        const existing = userMap.get(u.id);
+        if (!existing || time > existing.lastTime) {
+          userMap.set(u.id, { user: u, lastTime: time });
+        }
+      }
+    };
+
+    processUser(s);
+    processUser(r);
   });
-  return Array.from(userMap.values());
+
+  return Array.from(userMap.values())
+    .sort((a, b) => b.lastTime - a.lastTime)
+    .map((item) => item.user);
 };
 
 // --- FUNGSI BARU ALA WHATSAPP ---
@@ -50,14 +71,18 @@ export const filterMessagesByUser = (messages: Message[], selectedUser: User | n
   if (!selectedUser) return [];
   return messages.filter(
     (msg) =>
+      // Check expanded data
       msg.expand?.sender?.id === selectedUser.id ||
-      msg.expand?.recipient?.id === selectedUser.id
+      msg.expand?.recipient?.id === selectedUser.id ||
+      // Fallback to raw IDs
+      msg.sender === selectedUser.id ||
+      msg.recipient === selectedUser.id
   );
 };
 
 export const groupMessagesByDate = (messages: Message[]): GroupedMessages => {
   const groups: GroupedMessages = {};
-  [...messages].reverse().forEach((msg) => {
+  messages.forEach((msg) => {
     const dateKey = new Date(msg.created).toDateString();
     if (!groups[dateKey]) groups[dateKey] = [];
     groups[dateKey].push(msg);
